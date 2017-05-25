@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 
 		GameInput input [2] = {};
 		GameInput *old_input = &input[0];
-		GameInput *old_input = &input[1];
+		GameInput *new_input = &input[1];
 
 		game_update_and_render (&game_buffer, &game_sound_buffer) ;
 
@@ -177,7 +177,7 @@ void sdl_process_game_controller_button (GameButtonState * old_state, GameButton
 	 			SDL_GameController * controller_handle, SDL_GameControllerButton button) {
 
 	new_state->ended_down = SDL_GameControllerGetButton(controller_handle, button);
-	new_state->half_transition_count += ((new_state->ended_down == old_state->ended_down) ? 0 : 1)
+	new_state->half_transition_count += ((new_state->ended_down == old_state->ended_down) ? 0 : 1);
 }
 
 void sdl_fill_sound_buffer (SdlSoundBuffer * sound_buffer, GameOutputSoundBuffer * game_sound_buffer, int bytes_to_write) {

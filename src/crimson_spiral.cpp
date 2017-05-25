@@ -1,4 +1,4 @@
-#include "nova.h"
+#include "crimson_spiral.h"
 
 void game_update_and_render (GameOffscreenBuffer * game_buffer, GameOutputSoundBuffer * sound_buffer) {
 

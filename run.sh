@@ -1,1 +1,1 @@
-bin/nova &
+bin/crimson_spiral &

@@ -23,7 +23,7 @@ typedef double		f64;
 #include <math.h>
 #include <SDL.h>
 
-#include "nova.h"
+#include "crimson_spiral.h"
 
 
 struct SdlOffscreenBuffer {
