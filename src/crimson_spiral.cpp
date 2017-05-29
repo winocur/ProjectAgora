@@ -1,38 +1,34 @@
 #include "crimson_spiral.h"
 
-void game_update_and_render (GameOffscreenBuffer * game_buffer, GameOutputSoundBuffer * sound_buffer) {
+#include <GL\GLU.h>
+#include <GL\GL.h>
+#include <SDL_opengl.h>
 
-    local_persist int blue_offset = 0;
-    local_persist int green_offset = 0;
-    local_persist int tone_hz = 256;
+#include "sprites.cpp"
 
-    render_weird_gradient (game_buffer, blue_offset, green_offset);
+void game_init() {
 
-    blue_offset++;
-    green_offset++;
-
-    game_output_sound(sound_buffer, tone_hz);
+    load_sprite("../assets/test_spritesheet.bmp");
 }
 
-void render_weird_gradient (GameOffscreenBuffer * buffer, int blue_offset, int green_offset) {
+void game_update_and_render (int screen_width, int screen_height) {
 
-	int bytes_per_pixel = 4;
+    GLenum error = GL_NO_ERROR;
 
-	u8 * row = (u8 *) buffer->memory;
-	for (int y = 0; y < buffer->height; y++) {
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
 
-		u32 * pixel = (u32 *) row;
-		for(int x = 0; x < buffer->width; x++) {
+    render_sprite(screen_width, screen_height);
 
-			u8 blue = (x + blue_offset);
-			u8 green = (y + green_offset);
+    error = glGetError();
+    if( error != GL_NO_ERROR )
+    {
+      printf( "Error initializing OpenGL!");
+    }
 
-			*pixel++ = ((green << 8) | blue);
-		}
-
-		row += buffer->pitch;
-	}
+    //game_output_sound(sound_buffer, tone_hz);
 }
+
 
 void game_output_sound (GameOutputSoundBuffer * sound_buffer, int tone_hz) {
 

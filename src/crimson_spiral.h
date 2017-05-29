@@ -15,7 +15,9 @@ struct GameOutputSoundBuffer {
     //int running_sample_index;
 };
 
-void game_update_and_render (GameOffscreenBuffer * game_buffer, GameOutputSoundBuffer * sound_buffer) ;
+void game_init() ;
+
+void game_update_and_render (int screen_width, int screen_height) ;
 
 void render_weird_gradient (GameOffscreenBuffer * buffer, int x_offset, int y_offset) ;
 
