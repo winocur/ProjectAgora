@@ -29,7 +29,7 @@ void load_sprite(char* path) {
         texture_height = TextureImage[0]->h;
         /* Generate The Texture */
         glTexImage2D( GL_TEXTURE_2D, 0, 3, texture_width,
-              texture_height , 0, GL_RGB,
+              texture_height , 0, GL_BGR,
               GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
         glGetError();
 

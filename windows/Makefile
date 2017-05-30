@@ -1,4 +1,4 @@
-OBJS = ../src/win_sdl_crimson_spiral.cpp
+OBJS = ../src/sdl_crimson_spiral.cpp
 #OBJS specifies which files to compile as part of the project
 
 #CC specifies which compiler we're using
@@ -19,7 +19,7 @@ COMPILER_FLAGS = -w # -Wl,-subsystem,windows
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = win_crimson_spiral.exe
+OBJ_NAME = ../bin/crimson_spiral_win32.exe
 
 #This is the target that compiles our executable
 all : $(OBJS)

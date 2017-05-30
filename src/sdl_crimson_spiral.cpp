@@ -7,7 +7,7 @@
 #include <SDL_main.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "win_sdl_crimson_spiral.h"
+#include "sdl_crimson_spiral.h"
 
 #include <SDL_opengl.h>
 #include <GL\GLU.h>
