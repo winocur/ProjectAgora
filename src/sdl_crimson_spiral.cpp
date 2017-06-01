@@ -10,8 +10,8 @@
 #include "sdl_crimson_spiral.h"
 
 #include <SDL_opengl.h>
-#include <GL\GLU.h>
-#include <GL\GL.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
 
 #include "crimson_spiral.h"
 #include "crimson_spiral.cpp"
