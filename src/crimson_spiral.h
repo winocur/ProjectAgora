@@ -17,7 +17,7 @@ struct GameOutputSoundBuffer {
 
 void game_init() ;
 
-void game_update_and_render (int screen_width, int screen_height) ;
+void game_update_and_render (int screen_width, int screen_height, int ms_elapsed) ;
 
 void render_weird_gradient (GameOffscreenBuffer * buffer, int x_offset, int y_offset) ;
 

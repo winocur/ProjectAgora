@@ -75,12 +75,15 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
+		const int ms_delay = 16;
+
 		window_dimension = sdl_get_window_dimension(window);
 
-	  	game_update_and_render(window_dimension.width, window_dimension.height);
+	  	game_update_and_render(window_dimension.width, window_dimension.height, ms_delay);
+
 		SDL_GL_SwapWindow(window);
 		//SDL_GL_SwapBuffers();
-		SDL_Delay( 30 );
+		SDL_Delay( ms_delay );
 	} // -- END GAME LOOP -- //
 
 	SDL_DestroyWindow( window );
@@ -187,9 +190,11 @@ bool init_gl (int width, int height) {
     error = glGetError();
     if( error != GL_NO_ERROR )
     {
-        printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        printf( "init_gl -> Error initializing OpenGL! %s\n", gluErrorString( error ) );
         success = false;
-    }
+    } else {
+		printf("init_gl -> Initialized succesfully");
+	}
 
     return success;
 }
