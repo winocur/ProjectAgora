@@ -8,59 +8,59 @@
 struct SpriteSheet {
     int width;
     int height;
-    int x_count;
-    int y_count;
-    int frame_width;
-    int frame_height;
+    int xCount;
+    int yCount;
+    int frameWidth;
+    int frameHeight;
     GLuint texture;
 };
 
 struct SpriteSheetFrame {
-    int x_index;
-    int y_index;
+    int xIndex;
+    int yIndex;
 };
 
 struct SpriteAnimation {
     SpriteSheetFrame frames [MAX_FRAMES];
-    int frame_count;
+    int frameCount;
 
     char* identifier;
-    SpriteSheet* sprite_sheet;
+    SpriteSheet* spriteSheet;
 
-    bool is_loop;
-    int current_frame;
-    int frame_duration;
-    int frame_duration_counter;
+    bool isLoop;
+    int currentFrame;
+    int frameDuration;
+    int frameDurationCounter;
 
-    float relative_width_unit;
-    float relative_height_unit;
+    float relativeWidthUnit;
+    float relativeHeightUnit;
 
 };
 
-SpriteSheet * load_sprite_sheet(char* filepath, GLenum type, int x_count, int y_count) ;
+SpriteSheet * LoadSpriteSheet (char* filepath, GLenum type, int xCount, int yCount) ;
 
-SpriteAnimation * load_sprite_animation (SpriteSheet * sprite_sheet,
+SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
                                         char* identifier,
-                                        int frame_duration,
-                                        bool is_loop,
-                                        int x_start, int x_end,
-                                        int y_start, int y_end
+                                        int frameDuration,
+                                        bool isLoop,
+                                        int xStart, int xEnd,
+                                        int yStart, int yEnd
                                         );
 
-void unload_sprite_animation (SpriteAnimation * sprite_animation);
+void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation);
 
-void render_sprite_animation (SpriteAnimation * sprite_animation,
+void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 float x, float y,
-                                int screen_width, int screen_height,
-                                int ms_elapsed, float scale,
-                                bool is_flipped);
+                                int screenWidth, int screenHeight,
+                                int msElapsed, float scale,
+                                bool isFlipped);
 
-void reset_sprite_animation (SpriteAnimation * sprite_animation);
+void ResetSpriteAnimation (SpriteAnimation * spriteAnimation);
 
 
-void load_sprite(char* path) ;
+void LoadSprite(char* path) ;
 
-void render_sprite(int screen_width, int screen_height) ;
+void RenderSprite(int screenWidth, int screenHeight) ;
 
 
 

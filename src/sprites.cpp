@@ -1,35 +1,33 @@
-
-
 #include "sprites.h"
 
 #include <GL/gl.h>
 #include <SDL_opengl.h>
 
 
-SpriteSheet * load_sprite_sheet(char* filepath, GLenum type, int x_count, int y_count) {
+SpriteSheet * LoadSpriteSheet(char* filepath, GLenum type, int xCount, int yCount) {
     SpriteSheet * sheet = new SpriteSheet;
 
     /* Create storage space for the texture */
-    SDL_Surface * texture_image[1];
+    SDL_Surface * textureImage[1];
 
-    if (texture_image[0] = SDL_LoadBMP(filepath)) {
+    if (textureImage[0] = SDL_LoadBMP(filepath)) {
 
         glGenTextures( 1, &sheet->texture );
 
         glBindTexture(GL_TEXTURE_2D, sheet->texture);
 
-        sheet->width  = texture_image[0]->w;
-        sheet->height = texture_image[0]->h;
-        sheet->x_count = x_count;
-        sheet->y_count = y_count;
+        sheet->width  = textureImage[0]->w;
+        sheet->height = textureImage[0]->h;
+        sheet->xCount = xCount;
+        sheet->yCount = yCount;
 
-        sheet->frame_width  = sheet->width / sheet->x_count;
-        sheet->frame_height = sheet->height / sheet->y_count;
+        sheet->frameWidth  = sheet->width / sheet->xCount;
+        sheet->frameHeight = sheet->height / sheet->yCount;
 
         glTexImage2D(GL_TEXTURE_2D, 0, 3, sheet->width,
             //need alpha channel support or something yeahhh
               sheet->height, 0, type,
-              GL_UNSIGNED_BYTE, texture_image[0]->pixels);
+              GL_UNSIGNED_BYTE, textureImage[0]->pixels);
 
         //TODO error handling
         glGetError();
@@ -41,37 +39,37 @@ SpriteSheet * load_sprite_sheet(char* filepath, GLenum type, int x_count, int y_
         printf("failed to load spritesheet");
     }
 
-    if (texture_image[0]) {
-        SDL_FreeSurface(texture_image[0]);
+    if (textureImage[0]) {
+        SDL_FreeSurface(textureImage[0]);
     }
 
     return sheet;
 }
 
-SpriteAnimation * load_sprite_animation (SpriteSheet * sprite_sheet,
+SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
                                         char* identifier,
-                                        int frame_duration,
-                                        bool is_loop,
-                                        int x_start, int x_end,
-                                        int y_start, int y_end) {
+                                        int frameDuration,
+                                        bool isLoop,
+                                        int xStart, int xEnd,
+                                        int yStart, int yEnd) {
 
     SpriteAnimation * animation = new SpriteAnimation;
 
     animation->identifier = identifier;
-    animation->is_loop    = is_loop;
-    animation->frame_duration = frame_duration;
-    animation->frame_duration_counter = 0;
-    animation->current_frame = 0;
-    animation->sprite_sheet = sprite_sheet;
+    animation->isLoop    = isLoop;
+    animation->frameDuration = frameDuration;
+    animation->frameDurationCounter = 0;
+    animation->currentFrame = 0;
+    animation->spriteSheet = spriteSheet;
 
-    animation->frame_count = 0;
-    for(int y = y_start; y < y_end; ++y) {
-        for(int x = x_start; x < x_end; ++x) {
-            animation->frame_count++;
+    animation->frameCount = 0;
+    for(int y = yStart; y < yEnd; ++y) {
+        for(int x = xStart; x < xEnd; ++x) {
+            animation->frameCount++;
         }
     }
 
-    if(animation->frame_count > MAX_FRAMES) {
+    if(animation->frameCount > MAX_FRAMES) {
         printf("You are trying to allocate a sprite animation with more than the maximum frames allowed");
     }
 
@@ -79,11 +77,11 @@ SpriteAnimation * load_sprite_animation (SpriteSheet * sprite_sheet,
 
     //TODO end is not inclusive and beginning is inclusive
     //super ugly, make better
-    for(int y = y_start; y < y_end; ++y) {
-        for(int x = x_start; x < x_end; ++x) {
+    for(int y = yStart; y < yEnd; ++y) {
+        for(int x = xStart; x < xEnd; ++x) {
 
-            animation->frames[frame].x_index = x;
-            animation->frames[frame].y_index = y;
+            animation->frames[frame].xIndex = x;
+            animation->frames[frame].yIndex = y;
             ++frame;
         }
     }
@@ -91,53 +89,53 @@ SpriteAnimation * load_sprite_animation (SpriteSheet * sprite_sheet,
     return animation;
 }
 
-void unload_sprite_animation (SpriteAnimation * sprite_animation) {
-    delete [] sprite_animation->frames;
-    delete sprite_animation;
+void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation) {
+    delete [] spriteAnimation->frames;
+    delete spriteAnimation;
 }
 
 
-void render_sprite_animation (SpriteAnimation * sprite_animation,
+void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 float x, float y,
-                                int screen_width, int screen_height,
-                                int ms_elapsed, float scale = 1.f,
-                                bool is_flipped = false) {
+                                int screenWidth, int screenHeight,
+                                int msElapsed, float scale = 1.f,
+                                bool isFlipped = false) {
 
     //moves the counter and moves the current frame if needed
-    sprite_animation->frame_duration_counter += ms_elapsed;
+    spriteAnimation->frameDurationCounter += msElapsed;
 
-    while(sprite_animation->frame_duration_counter >= sprite_animation->frame_duration) {
+    while(spriteAnimation->frameDurationCounter >= spriteAnimation->frameDuration) {
 
-        sprite_animation->current_frame++;
+        spriteAnimation->currentFrame++;
 
         //reached the end of the animation
-        if(sprite_animation->current_frame == sprite_animation->frame_count) {
-            if(sprite_animation->is_loop) {
-                sprite_animation->current_frame = 0;
+        if(spriteAnimation->currentFrame == spriteAnimation->frameCount) {
+            if(spriteAnimation->isLoop) {
+                spriteAnimation->currentFrame = 0;
             } else {
-                sprite_animation->current_frame--;
+                spriteAnimation->currentFrame--;
             }
         }
 
         // moves the counter back
-        sprite_animation->frame_duration_counter -= sprite_animation->frame_duration;
+        spriteAnimation->frameDurationCounter -= spriteAnimation->frameDuration;
     }
 
-    const SpriteSheet * sprite_sheet = sprite_animation->sprite_sheet;
-    const SpriteSheetFrame current_frame = sprite_animation->frames[sprite_animation->current_frame];
+    const SpriteSheet * spriteSheet = spriteAnimation->spriteSheet;
+    const SpriteSheetFrame currentFrame = spriteAnimation->frames[spriteAnimation->currentFrame];
 
-    float relative_width_unit = 1.f / sprite_sheet->x_count;
-    float relative_height_unit = 1.f / sprite_sheet->y_count;
+    float relativeWidthUnit = 1.f / spriteSheet->xCount;
+    float relativeHeightUnit = 1.f / spriteSheet->yCount;
 
-    float sprite_width = scale * sprite_sheet->width / sprite_sheet->x_count / (float)screen_width;
-    float sprite_height = scale * sprite_sheet->height / sprite_sheet->y_count / (float)screen_height;
+    float spriteWidth = scale * spriteSheet->width / spriteSheet->xCount / (float)screenWidth;
+    float spriteHeight = scale * spriteSheet->height / spriteSheet->yCount / (float)screenHeight;
 
     //centered around insertion point
-    float x_position = x - (sprite_width / 2);
-    float y_position = y - (sprite_height / 2);
+    float xPosition = x - (spriteWidth / 2);
+    float yPosition = y - (spriteHeight / 2);
 
     //bind texture
-    glBindTexture(GL_TEXTURE_2D, sprite_sheet->texture);
+    glBindTexture(GL_TEXTURE_2D, spriteSheet->texture);
 
     glBegin(GL_QUADS);
         //tint
@@ -145,44 +143,44 @@ void render_sprite_animation (SpriteAnimation * sprite_animation,
 
         //OpenGL
         //top left
-        glTexCoord2f(relative_width_unit * current_frame.x_index,          //x
-                    relative_height_unit * (current_frame.y_index + 1));   //y
-        if(is_flipped) {
-            glVertex2f( x_position + sprite_width, y_position);
+        glTexCoord2f(relativeWidthUnit * currentFrame.xIndex,          //x
+                    relativeHeightUnit * (currentFrame.yIndex + 1));   //y
+        if(isFlipped) {
+            glVertex2f( xPosition + spriteWidth, yPosition);
         } else {
-            glVertex2f( x_position, y_position);
+            glVertex2f( xPosition, yPosition);
         }
         //top right
-        glTexCoord2f(relative_width_unit * (current_frame.x_index + 1),    //x
-                    relative_height_unit * (current_frame.y_index + 1));   //y
-        if(is_flipped) {
-            glVertex2f( x_position, y_position);
+        glTexCoord2f(relativeWidthUnit * (currentFrame.xIndex + 1),    //x
+                    relativeHeightUnit * (currentFrame.yIndex + 1));   //y
+        if(isFlipped) {
+            glVertex2f( xPosition, yPosition);
         } else {
-            glVertex2f( x_position + sprite_width, y_position);
+            glVertex2f( xPosition + spriteWidth, yPosition);
         }
 
         //bot right
-        glTexCoord2f(relative_width_unit * (current_frame.x_index + 1),    //x
-                    relative_height_unit * current_frame.y_index);         //y
-        if(is_flipped) {
-            glVertex2f( x_position, y_position + sprite_height);
+        glTexCoord2f(relativeWidthUnit * (currentFrame.xIndex + 1),    //x
+                    relativeHeightUnit * currentFrame.yIndex);         //y
+        if(isFlipped) {
+            glVertex2f( xPosition, yPosition + spriteHeight);
         } else {
-            glVertex2f( x_position + sprite_width, y_position + sprite_height);
+            glVertex2f( xPosition + spriteWidth, yPosition + spriteHeight);
         }
         //bot left
-        glTexCoord2f(relative_width_unit * current_frame.x_index,          //x
-                    relative_height_unit * current_frame.y_index);         //y
-        if(is_flipped) {
-            glVertex2f( x_position + sprite_width, y_position + sprite_height);
+        glTexCoord2f(relativeWidthUnit * currentFrame.xIndex,          //x
+                    relativeHeightUnit * currentFrame.yIndex);         //y
+        if(isFlipped) {
+            glVertex2f( xPosition + spriteWidth, yPosition + spriteHeight);
         } else {
-            glVertex2f( x_position, y_position + sprite_height);
+            glVertex2f( xPosition, yPosition + spriteHeight);
         }
     glEnd();
 }
 
-void reset_sprite_animation (SpriteAnimation * sprite_animation) {
-    sprite_animation->current_frame = 0;
-    sprite_animation->frame_duration_counter = 0;
+void ResetSpriteAnimation (SpriteAnimation * spriteAnimation) {
+    spriteAnimation->currentFrame = 0;
+    spriteAnimation->frameDurationCounter = 0;
 }
 
 
@@ -192,10 +190,10 @@ void reset_sprite_animation (SpriteAnimation * sprite_animation) {
 //Texture storage.
 GLuint texture[1];
 
-int texture_width;
-int texture_height;
+int textureWidth;
+int textureHeight;
 
-void load_sprite(char* path) {
+void LoadSprite(char* path) {
 
     /* Create storage space for the texture */
     SDL_Surface *TextureImage[1];
@@ -208,11 +206,11 @@ void load_sprite(char* path) {
         /* Typical Texture Generation Using Data From The Bitmap */
         glBindTexture( GL_TEXTURE_2D, texture[0] );
 
-        texture_width =  TextureImage[0]->w;
-        texture_height = TextureImage[0]->h;
+        textureWidth =  TextureImage[0]->w;
+        textureHeight = TextureImage[0]->h;
         /* Generate The Texture */
-        glTexImage2D( GL_TEXTURE_2D, 0, 3, texture_width,
-              texture_height , 0, GL_BGR,
+        glTexImage2D( GL_TEXTURE_2D, 0, 3, textureWidth,
+              textureHeight , 0, GL_BGR,
               GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
         glGetError();
 
@@ -230,24 +228,24 @@ void load_sprite(char* path) {
 
 }
 
-void render_sprite (int screen_width, int screen_height) {
+void RenderSprite (int screenWidth, int screenHeight) {
 
     float scale = 2;
 
-    const float width_item_count = 6;
-    const float height_item_count = 5;
+    const float widthItemCount = 6;
+    const float heightItemCount = 5;
 
-    static float width_index = 0;
-    static float height_index = 0;
+    static float widthIndex = 0;
+    static float heightIndex = 0;
 
-    float relative_width_unit = 1.f / width_item_count;
-    float relative_height_unit = 1.f / height_item_count;
+    float relativeWidthUnit = 1.f / widthItemCount;
+    float relativeHeightUnit = 1.f / heightItemCount;
 
-    float relative_texture_width = scale * texture_width / width_item_count / (float)screen_width;
-    float relative_texture_height = scale * texture_height / height_item_count / (float)screen_height;
+    float relativeTextureWidth = scale * textureWidth / widthItemCount / (float)screenWidth;
+    float relativeTextureHeight = scale * textureHeight / heightItemCount / (float)screenHeight;
 
-    float x_position = 0 - (relative_texture_width / 2);
-    float y_position = 0 - (relative_texture_height / 2);
+    float xPosition = 0 - (relativeTextureWidth / 2);
+    float yPosition = 0 - (relativeTextureHeight / 2);
 
     glBegin(GL_QUADS);
         //tinte
@@ -255,30 +253,30 @@ void render_sprite (int screen_width, int screen_height) {
 
         //OpenGL
         //top left
-        glTexCoord2f(relative_width_unit * width_index, relative_height_unit * (height_index + 1));
-        glVertex2f( x_position, y_position);
+        glTexCoord2f(relativeWidthUnit * widthIndex, relativeHeightUnit * (heightIndex + 1));
+        glVertex2f( xPosition, yPosition);
 
         //top right
-        glTexCoord2f(relative_width_unit * (width_index + 1), relative_height_unit * (height_index + 1));
-        glVertex2f( x_position + relative_texture_width, y_position);
+        glTexCoord2f(relativeWidthUnit * (widthIndex + 1), relativeHeightUnit * (heightIndex + 1));
+        glVertex2f( xPosition + relativeTextureWidth, yPosition);
 
         //bot right
-        glTexCoord2f(relative_width_unit * (width_index + 1), relative_height_unit * height_index);
-        glVertex2f( x_position + relative_texture_width, y_position + relative_texture_height);
+        glTexCoord2f(relativeWidthUnit * (widthIndex + 1), relativeHeightUnit * heightIndex);
+        glVertex2f( xPosition + relativeTextureWidth, yPosition + relativeTextureHeight);
 
         //bot left
-        glTexCoord2f(relative_width_unit * width_index, relative_height_unit * height_index);
-        glVertex2f( x_position, y_position + relative_texture_height);
+        glTexCoord2f(relativeWidthUnit * widthIndex, relativeHeightUnit * heightIndex);
+        glVertex2f( xPosition, yPosition + relativeTextureHeight);
 
     glEnd();
 
     //wraps around indexes
-    width_index++;
-    if(width_index == width_item_count) {
-        width_index = 0;
-        height_index++;
-        if(height_index == height_item_count) {
-            height_index = 0;
+    widthIndex++;
+    if(widthIndex == widthItemCount) {
+        widthIndex = 0;
+        heightIndex++;
+        if(heightIndex == heightItemCount) {
+            heightIndex = 0;
         }
     }
 

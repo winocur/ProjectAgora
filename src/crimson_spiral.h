@@ -1,42 +1,19 @@
-#ifndef crimson_spiral
-#define crimson_spiral
-
-struct GameOffscreenBuffer {
-    void * memory;
-    int width;
-    int height;
-    int pitch;
-};
-
-struct GameOutputSoundBuffer {
-    int samples_per_second;
-    int sample_count;
-    i16 * samples;
-    //int running_sample_index;
-};
-
-void game_init() ;
-
-void game_update_and_render (int screen_width, int screen_height, int ms_elapsed) ;
-
-void render_weird_gradient (GameOffscreenBuffer * buffer, int x_offset, int y_offset) ;
-
-void game_output_sound (GameOutputSoundBuffer * sound_buffer, int tone_hz);
-
+#ifndef crimsonSpiral
+#define crimsonSpiral
 
 //input
 struct GameButtonState {
-    int half_transition_count;
-    bool ended_down;
+    int halfTransitionCount;
+    bool endedDown;
 };
 
 struct GameControllerInput {
-    bool is_analog;
+    bool isAnalog;
 
-    f32 start_x, start_y;
-    f32 min_x, min_y;
-    f32 max_x, max_y;
-    f32 end_x, end_y;
+    f32 startX, startY;
+    f32 minX, minY;
+    f32 maxX, maxY;
+    f32 endX, endY;
 
     union {
         GameButtonState buttons [6];
@@ -45,8 +22,8 @@ struct GameControllerInput {
             GameButtonState down;
             GameButtonState left;
             GameButtonState right;
-            GameButtonState left_shoulder;
-            GameButtonState right_shoulder;
+            GameButtonState leftShoulder;
+            GameButtonState rightShoulder;
         };
     };
 };
@@ -54,6 +31,14 @@ struct GameControllerInput {
 struct GameInput {
     GameControllerInput controllers [4];
 };
+
+void GameInit();
+
+void GameUpdateAndRender (int screenWidth, int screenHeight, int msElapsed) ;
+
+void GameCleanup();
+
+
 
 
 #endif

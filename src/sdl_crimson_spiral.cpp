@@ -16,7 +16,7 @@
 #include "crimson_spiral.h"
 #include "crimson_spiral.cpp"
 
-static SdlWindowDimension window_dimension;
+static SdlWindowDimension windowDimension;
 
 int main(int argc, char *argv[]) {
 
@@ -39,13 +39,13 @@ int main(int argc, char *argv[]) {
 		printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
 	}
 
-	window_dimension = sdl_get_window_dimension(window);
+	windowDimension = SdlGetWindowDimension(window);
 
 
 	SDL_GetRendererInfo(renderer, &rendererInfo);
     if ((rendererInfo.flags & SDL_RENDERER_ACCELERATED) == 0 ||
         (rendererInfo.flags & SDL_RENDERER_TARGETTEXTURE) == 0) {
-        output_debug("thus is borked!");
+        OutputDebug("thus is borked!");
     }
 
 
@@ -59,9 +59,9 @@ int main(int argc, char *argv[]) {
   	printf( "Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError() );
 	}
 
-	init_gl(window_dimension.width, window_dimension.height);
+	InitGL (windowDimension.width, windowDimension.height);
 
-	game_init();
+	GameInit();
 
 	// -- MAIN GAME LOOP -- //
 	bool running = true;
@@ -70,51 +70,51 @@ int main(int argc, char *argv[]) {
 
 		SDL_Event event;
 		while(SDL_PollEvent(&event)) {
-				if (handle_event(&event)) {
+				if (HandleEvent(&event)) {
 				running = false;
 			}
 		}
 
-		const int ms_delay = 16;
+		const int msDelay = 16;
 
-		window_dimension = sdl_get_window_dimension(window);
+		windowDimension = SdlGetWindowDimension(window);
 
-	  	game_update_and_render(window_dimension.width, window_dimension.height, ms_delay);
+	  	GameUpdateAndRender(windowDimension.width, windowDimension.height, msDelay);
 
 		SDL_GL_SwapWindow(window);
 		//SDL_GL_SwapBuffers();
-		SDL_Delay( ms_delay );
+		SDL_Delay( msDelay );
 	} // -- END GAME LOOP -- //
 
 	SDL_DestroyWindow( window );
-	cleanup();
+	Cleanup();
 
 	return 0;
 }
 
-void cleanup () {
-		output_debug("Cleaning up resources");
+void Cleanup () {
+		OutputDebug("Cleaning up resources");
 		SDL_CloseAudio();
 		SDL_Quit();
 }
 
-void output_debug(char * message) {
+void OutputDebug(char * message) {
 	printf("%s", message);
 	printf("\n");
 }
 
-bool handle_event(SDL_Event * event) {
+bool HandleEvent (SDL_Event * event) {
 	switch (event->type) {
 		case SDL_QUIT: {
-			output_debug("SDL_QUIT");
+			OutputDebug("SDL_QUIT");
 			return true;
 		} break;
 
 		case SDL_WINDOWEVENT: {
 			switch(event->window.event) {
 				case SDL_WINDOWEVENT_SIZE_CHANGED: {
-					window_dimension.width = event->window.data1;
-					window_dimension.height = event->window.data2;
+					windowDimension.width = event->window.data1;
+					windowDimension.height = event->window.data2;
 				}break;
 				case SDL_WINDOWEVENT_EXPOSED:
 				{
@@ -124,31 +124,31 @@ bool handle_event(SDL_Event * event) {
 		}
 		case SDL_KEYDOWN:
 		case SDL_KEYUP: {
-			bool was_down = false;
-			SDL_Keycode key_code = event->key.keysym.sym;
+			bool wasDown = false;
+			SDL_Keycode keycode = event->key.keysym.sym;
 			if(event->key.state == SDL_RELEASED) {
-				was_down = true;
+				wasDown = true;
 			} else if (event->key.repeat != 0) {
-				was_down = true;
+				wasDown = true;
 			}
-			if(key_code == SDLK_a) {
+			if(keycode == SDLK_a) {
 
-			} else if(key_code == SDLK_s) {
+			} else if(keycode == SDLK_s) {
 
-			} else if(key_code == SDLK_d) {
+			} else if(keycode == SDLK_d) {
 
-			} else if(key_code == SDLK_w) {
+			} else if(keycode == SDLK_w) {
 
-			} else if(key_code == SDLK_z) {
+			} else if(keycode == SDLK_z) {
 
-			} else if(key_code == SDLK_x) {
+			} else if(keycode == SDLK_x) {
 
-			} else if(key_code == SDLK_RETURN) {
+			} else if(keycode == SDLK_RETURN) {
 
-			} else if(key_code == SDLK_ESCAPE) {
+			} else if(keycode == SDLK_ESCAPE) {
 				//single keystroke down
-				if(!was_down) {
-					output_debug("ESCAPE event!");
+				if(!wasDown) {
+					OutputDebug("ESCAPE event!");
 				}
 			}
 		} break;
@@ -157,7 +157,7 @@ bool handle_event(SDL_Event * event) {
 }
 
 
-bool init_gl (int width, int height) {
+bool InitGL (int width, int height) {
 
 	float ratio = (float) width / (float) height;
 
@@ -190,16 +190,16 @@ bool init_gl (int width, int height) {
     error = glGetError();
     if( error != GL_NO_ERROR )
     {
-        printf( "init_gl -> Error initializing OpenGL! %s\n", gluErrorString( error ) );
+        printf( "InitGL -> Error initializing OpenGL! %s\n", gluErrorString( error ) );
         success = false;
     } else {
-		printf("init_gl -> Initialized succesfully");
+		printf("InitGL -> Initialized succesfully");
 	}
 
     return success;
 }
 
-SdlWindowDimension sdl_get_window_dimension (SDL_Window *window) {
+SdlWindowDimension SdlGetWindowDimension (SDL_Window *window) {
 	SdlWindowDimension result;
     SDL_GetWindowSize(window, &result.width, &result.height);
     return result;
