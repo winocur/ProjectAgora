@@ -31,8 +31,7 @@ int main(int argc, char *argv[]) {
 	SDL_Window *window;
 	SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_OPENGL, &window, &renderer);
 
-	SDL_SetWindowTitle(window, "Crimson Spiral (Prototype)");
-
+	char* windowTitle = new char[64];
 
 	if( window == NULL )
 	{
@@ -45,7 +44,7 @@ int main(int argc, char *argv[]) {
 	SDL_GetRendererInfo(renderer, &rendererInfo);
     if ((rendererInfo.flags & SDL_RENDERER_ACCELERATED) == 0 ||
         (rendererInfo.flags & SDL_RENDERER_TARGETTEXTURE) == 0) {
-        OutputDebug("thus is borked!");
+        OutputDebug("this is borked!");
     }
 
 
@@ -56,7 +55,7 @@ int main(int argc, char *argv[]) {
 
 	if( SDL_GL_SetSwapInterval( 1 ) < 0 )
 	{
-  	printf( "Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError() );
+  		printf( "Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError() );
 	}
 
 	InitGL (windowDimension.width, windowDimension.height);
@@ -66,27 +65,60 @@ int main(int argc, char *argv[]) {
 	// -- MAIN GAME LOOP -- //
 	bool running = true;
 
+	// minimum fps a frame can take
+	const f64 fpsCap = 144.f;
+	const f64 msMinCap = (1000.f / fpsCap);
+
+	f64 msElapsed = 0.f;
+	f64 FPS = 0.f;
+
+	u64 performanceFrequency = SDL_GetPerformanceFrequency();
+	u64 lastCounter = SDL_GetPerformanceCounter();
+
+	TempGameInput input;
+	input.xAxis = 0.f;
+	input.yAxis = 0.f;
+
 	while(running) {
+
+		sprintf(windowTitle, "Crimson Spiral (Prototype) fps: %f", FPS);
+		SDL_SetWindowTitle(window, windowTitle);
 
 		SDL_Event event;
 		while(SDL_PollEvent(&event)) {
-				if (HandleEvent(&event)) {
+				if (HandleEvent(&event, &input)) {
 				running = false;
 			}
 		}
 
-		const int msDelay = 16;
-
 		windowDimension = SdlGetWindowDimension(window);
 
-	  	GameUpdateAndRender(windowDimension.width, windowDimension.height, msDelay);
+	  	GameUpdateAndRender(windowDimension.width, windowDimension.height, msElapsed, input);
 
 		SDL_GL_SwapWindow(window);
-		//SDL_GL_SwapBuffers();
-		SDL_Delay( msDelay );
+
+		u64 endCounter = SDL_GetPerformanceCounter();
+		u64 counterElapsed = endCounter - lastCounter;
+		msElapsed = ((1000.0f * (f64)counterElapsed) / (f64) performanceFrequency);
+		FPS = ((f64) performanceFrequency / (f64)counterElapsed);
+
+		// if the frame took too short we delay some ms and recalculate
+		if(msElapsed < msMinCap) {
+			SDL_Delay(msMinCap - msElapsed);
+
+			endCounter = SDL_GetPerformanceCounter();
+			counterElapsed = endCounter - lastCounter;
+
+			msElapsed = ((1000.0f * (f64)counterElapsed) / (f64) performanceFrequency);
+			FPS = fpsCap;
+		}
+
+		lastCounter = endCounter;
 	} // -- END GAME LOOP -- //
 
-	SDL_DestroyWindow( window );
+	delete[] windowTitle;
+	SDL_DestroyWindow (window);
+
 	Cleanup();
 
 	return 0;
@@ -103,7 +135,7 @@ void OutputDebug(char * message) {
 	printf("\n");
 }
 
-bool HandleEvent (SDL_Event * event) {
+bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 	switch (event->type) {
 		case SDL_QUIT: {
 			OutputDebug("SDL_QUIT");
@@ -129,16 +161,32 @@ bool HandleEvent (SDL_Event * event) {
 			if(event->key.state == SDL_RELEASED) {
 				wasDown = true;
 			} else if (event->key.repeat != 0) {
-				wasDown = true;
+				wasDown = false;
 			}
 			if(keycode == SDLK_a) {
-
+				if(wasDown) {
+					input->xAxis = 0;
+				} else {
+					input->xAxis = -1.f;
+				}
 			} else if(keycode == SDLK_s) {
-
+				if(wasDown) {
+					input->yAxis = 0;
+				} else {
+					input->yAxis = -1.f;
+				}
 			} else if(keycode == SDLK_d) {
-
+				if(wasDown) {
+					input->xAxis = 0;
+				} else {
+					input->xAxis = 1.f;
+				}
 			} else if(keycode == SDLK_w) {
-
+				if(wasDown) {
+					input->yAxis = 0;
+				} else {
+					input->yAxis = 1.f;
+				}
 			} else if(keycode == SDLK_z) {
 
 			} else if(keycode == SDLK_x) {

@@ -26,7 +26,9 @@ struct SdlWindowDimension {
     int height;
 };
 
-bool HandleEvent(SDL_Event* event);
+
+
+bool HandleEvent(SDL_Event* event, TempGameInput* input);
 
 SdlWindowDimension SdlGetWindowDimension (SDL_Window * window);
 

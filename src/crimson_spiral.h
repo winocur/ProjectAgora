@@ -1,7 +1,17 @@
 #ifndef crimsonSpiral
 #define crimsonSpiral
 
+#include "sprites.h"
+
 //input
+
+//Temporary for test purpouses
+struct TempGameInput {
+    f32 xAxis;
+    f32 yAxis;
+};
+
+//Better version
 struct GameButtonState {
     int halfTransitionCount;
     bool endedDown;
@@ -32,12 +42,28 @@ struct GameInput {
     GameControllerInput controllers [4];
 };
 
+struct Vector3 {
+    f64 x, y, z;
+};
+
+struct Fighter {
+    Vector3 position;
+
+    SpriteAnimation* moveRight;
+    SpriteAnimation* moveLeft;
+    SpriteAnimation* moveUp;
+    SpriteAnimation* moveDown;
+
+    f32 scale;
+};
+
 void GameInit();
 
-void GameUpdateAndRender (int screenWidth, int screenHeight, int msElapsed) ;
+void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
 
 void GameCleanup();
 
+void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed);
 
 
 
