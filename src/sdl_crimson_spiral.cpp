@@ -193,7 +193,7 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 			} else if(keycode == SDLK_x) {
 
 			} else if(keycode == SDLK_RETURN) {
-				audioTest.PlayOggFile("itworks.ogg", audioTest.m_buffer, audioTest.m_format, audioTest.m_freq);
+				audioTest.PlayOggFile("../assets/audio/itworks.ogg", audioTest.m_buffer, audioTest.m_format, audioTest.m_freq);
 			} else if(keycode == SDLK_ESCAPE) {
 				//single keystroke down
 				if(!wasDown) {

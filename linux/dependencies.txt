@@ -1,0 +1,4 @@
+ubuntu packages
+
+libvorbis-dev
+libalut-dev

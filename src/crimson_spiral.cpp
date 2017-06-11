@@ -21,8 +21,8 @@ Fighter * fighter;
 
 void GameInit() {
 
-    runningDude = LoadSpriteSheet("../assets/test_spritesheet.bmp", GL_BGR, 6, 5);
-    otherDude = LoadSpriteSheet("../assets/other_dude.bmp", GL_BGRA, 9, 4);
+    runningDude = LoadSpriteSheet("../assets/spritesheets/test_spritesheet.bmp", GL_BGR, 6, 5);
+    otherDude = LoadSpriteSheet("../assets/spritesheets/other_dude.bmp", GL_BGRA, 9, 4);
 
     fighterMoveRight    = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 3, 4);
     fighterMoveLeft     = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 1, 2);
