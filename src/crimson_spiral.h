@@ -62,6 +62,8 @@ struct Fighter {
 void GameInit();
 
 void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
+void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed);
 
 void GameCleanup();
 
+#endif  /* H_CRIMSONSPIRAL */
