@@ -1,5 +1,5 @@
 #define MAX_CONTROLLERS 4
-#define internal static
+//#define internal static
 
 #define SDL_MAIN_HANDLED
 
@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
 void Cleanup () {
 		OutputDebug("Cleaning up resources");
 		SDL_CloseAudio();
+		audioTest.Destroy();
 		SDL_Quit();
 }
 
@@ -175,6 +176,7 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 				} else {
 					input->yAxis = -1.f;
 				}
+				 audioTest.PlayOggFile("itworks.ogg", audioTest.m_buffer, audioTest.m_format, audioTest.m_freq);
 			} else if(keycode == SDLK_d) {
 				if(wasDown) {
 					input->xAxis = 0;
@@ -197,6 +199,7 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 				//single keystroke down
 				if(!wasDown) {
 					OutputDebug("ESCAPE event!");
+					return true;
 				}
 			}
 		} break;

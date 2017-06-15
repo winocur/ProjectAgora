@@ -31,6 +31,7 @@ void GameInit() {
 
     runningDudeAnimation1 = LoadSpriteAnimation(runningDude, "runningDude1", 16, true, 0, 6, 0, 5);
     runningDudeAnimation2 = LoadSpriteAnimation(runningDude, "runningDude2", 32, true, 0, 6, 0, 5);
+    audioTest.Initialize();
 
     fighter = new Fighter();
 

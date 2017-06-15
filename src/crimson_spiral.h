@@ -1,8 +1,10 @@
-#ifndef crimsonSpiral
-#define crimsonSpiral
+#ifndef H_CRIMSONSPIRAL
+#define H_CRIMSONSPIRAL
 
 #include "sprites.h"
-
+// Audio
+#include "Sonos.h"
+Sonos audioTest = { 0, 0, 0, 0, 0, {} };
 //input
 
 //Temporary for test purpouses
@@ -63,8 +65,3 @@ void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, Temp
 
 void GameCleanup();
 
-void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed);
-
-
-
-#endif

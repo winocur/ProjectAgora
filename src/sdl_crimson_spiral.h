@@ -1,5 +1,5 @@
-#ifndef sdlCrimsonSpiral
-#define sdlCrimsonSpiral
+#ifndef H_SDL_CRIMSONSPIRAL
+#define H_SDL_CRIMSONSPIRAL
 
 //rust-like numerical types
 typedef uint8_t 	u8;
@@ -21,6 +21,7 @@ typedef double		f64;
 
 #include "crimson_spiral.h"
 
+
 struct SdlWindowDimension {
     int width;
     int height;
@@ -39,4 +40,4 @@ void OutputDebug(char * message);
 //Initializes matrices and clear color
 bool InitGL (int width, int height);
 
-#endif
+#endif  /* H_SDL_CRIMSONSPIRAL */
