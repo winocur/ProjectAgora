@@ -45,6 +45,8 @@ struct Sprite {
     char* identifier;
     SpriteSheet* spriteSheet;
 
+    int xIndex, yIndex;
+
     float relativeWidthUnit;
     float relativeHeightUnit;
 };
@@ -59,7 +61,7 @@ SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
                                         int yStart, int yEnd
                                         );
 
-Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier, int x, int y);
+Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier, int xSheet , int ySheet);
 
 void UnloadSprite (Sprite * sprite);
 

@@ -10,6 +10,9 @@
 SpriteSheet * runningDude;
 SpriteSheet * otherDude;
 SpriteSheet * someGirl;
+SpriteSheet * backgroundSheet;
+
+Sprite * backgroundSprite;
 
 SpriteAnimation * girlMoveRight;
 
@@ -20,6 +23,8 @@ SpriteAnimation * fighterMoveRight;
 SpriteAnimation * fighterMoveLeft;
 SpriteAnimation * fighterMoveUp;
 SpriteAnimation * fighterMoveDown;
+
+
 
 Fighter * fighter;
 
@@ -33,6 +38,8 @@ void GameInit(SDL_Surface * windowSurface) {
     someGirl = LoadSpriteSheet("../assets/spritesheets/some_girl.png",
                                 GL_RGBA, PNG, windowSurface, 14, 4);
 
+    backgroundSheet = LoadSpriteSheet ("../assets/images/test_bg.png",
+                                        GL_RGB, PNG, windowSurface, 1, 1);
 
     girlMoveRight       = LoadSpriteAnimation (someGirl, "someGirlR", 64, true, 0, 14, 2, 3);
 
@@ -43,6 +50,9 @@ void GameInit(SDL_Surface * windowSurface) {
 
     runningDudeAnimation1 = LoadSpriteAnimation(runningDude, "runningDude1", 16, true, 0, 6, 0, 5);
     runningDudeAnimation2 = LoadSpriteAnimation(runningDude, "runningDude2", 32, true, 0, 6, 0, 5);
+
+    backgroundSprite = LoadSprite(backgroundSheet, "background", 0, 0);
+
     audioTest.Initialize();
 
     fighter = new Fighter();
@@ -64,6 +74,8 @@ void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, Temp
 
     //Clear color buffer
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    RenderSprite(backgroundSprite, 0, 0, screenWidth, screenHeight, 1.4f);
 
     RenderSpriteAnimation(runningDudeAnimation1, 0.5f, 0.5f, screenWidth, screenHeight, msElapsed);
     RenderSpriteAnimation(runningDudeAnimation2, -0.5f, -0.5f, screenWidth, screenHeight, msElapsed, 1.5f, true);
