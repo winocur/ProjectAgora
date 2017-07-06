@@ -59,6 +59,7 @@ void GameInit(SDL_Surface * windowSurface) {
     fighter->moveDown   = fighterMoveDown;
     fighter->moveLeft   = fighterMoveLeft;
     fighter->moveRight  = fighterMoveRight;
+    fighter->lastAnimation = fighterMoveRight;
 
     fighter->position.x = 0.f;
     fighter->position.y = 0.f;
@@ -100,13 +101,34 @@ void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int scree
     fighter->position.x += fighterSpeed * deltaTime * input->xAxis;
     fighter->position.y += fighterSpeed * deltaTime * input->yAxis;
 
-    if(input->xAxis > 0) animation = fighter->moveRight;
-    if(input->xAxis < 0) animation = fighter->moveLeft;
-    if(input->yAxis > 0) animation = fighter->moveUp;
-    if(input->yAxis < 0) animation = fighter->moveDown;
+    //TODO make idle checks better
+    if(input->xAxis > 0) {
+        animation = fighter->moveRight;
+        fighter->idleCounter = 200;
+    } else if(input->xAxis < 0) {
+        animation = fighter->moveLeft;
+        fighter->idleCounter = 200;
+    } else if(input->yAxis > 0) {
+        animation = fighter->moveUp;
+        fighter->idleCounter = 200;
+    } else if(input->yAxis < 0) {
+        animation = fighter->moveDown;
+        fighter->idleCounter = 200;
+    } else {
+        fighter->idleCounter -= msElapsed;
+        animation = fighter->lastAnimation;
+
+        if(fighter->idleCounter < 0) {
+            ResetSpriteAnimation(animation);
+        }
+
+        msElapsed = 0;
+    }
 
     RenderSpriteAnimation(animation, fighter->position.x, fighter->position.y,
                         screenWidth, screenHeight, msElapsed, fighter->scale, false);
+
+    fighter->lastAnimation = animation;
 }
 
 void GameCleanup() {

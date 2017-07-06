@@ -55,8 +55,11 @@ struct Fighter {
     SpriteAnimation* moveLeft;
     SpriteAnimation* moveUp;
     SpriteAnimation* moveDown;
-
+    SpriteAnimation* lastAnimation;
     f32 scale;
+
+    bool idle = true;
+    i32 idleCounter = 200;
 };
 
 void GameInit(SDL_Surface * surface);
