@@ -20,13 +20,15 @@ struct SpriteSheet {
     GLuint texture;
 };
 
-struct SpriteSheetFrame {
-    int xIndex;
-    int yIndex;
+struct Sprite {
+    char* identifier;
+    SpriteSheet* spriteSheet;
+
+    int xIndex, yIndex;
 };
 
 struct SpriteAnimation {
-    SpriteSheetFrame frames [MAX_FRAMES];
+    Sprite frames [MAX_FRAMES];
     int frameCount;
 
     char* identifier;
@@ -36,16 +38,6 @@ struct SpriteAnimation {
     int currentFrame;
     int frameDuration;
     int frameDurationCounter;
-
-    float relativeWidthUnit;
-    float relativeHeightUnit;
-};
-
-struct Sprite {
-    char* identifier;
-    SpriteSheet* spriteSheet;
-
-    int xIndex, yIndex;
 
     float relativeWidthUnit;
     float relativeHeightUnit;
@@ -73,7 +65,7 @@ void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 int msElapsed, float scale,
                                 bool isFlipped);
 
-void RenderSprite (Sprite * sprite,
+void RenderSprite (const Sprite * sprite,
                     float x, float y,
                     int screenWidth, int screenHeight, float scale,
                     bool isFlipped);

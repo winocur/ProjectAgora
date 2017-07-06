@@ -24,8 +24,6 @@ SpriteAnimation * fighterMoveLeft;
 SpriteAnimation * fighterMoveUp;
 SpriteAnimation * fighterMoveDown;
 
-
-
 Fighter * fighter;
 
 void GameInit(SDL_Surface * windowSurface) {

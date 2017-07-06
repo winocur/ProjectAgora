@@ -101,7 +101,7 @@ SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
     //super ugly, make better
     for(int y = yStart; y < yEnd; ++y) {
         for(int x = xStart; x < xEnd; ++x) {
-
+            animation->frames[frame].spriteSheet = spriteSheet;
             animation->frames[frame].xIndex = x;
             animation->frames[frame].yIndex = y;
             ++frame;
@@ -117,12 +117,10 @@ void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation) {
     spriteAnimation = NULL;
 }
 
-
 void UnloadSprite (Sprite * sprite) {
     delete sprite;
     sprite = NULL;
 }
-
 
 void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 float x, float y,
@@ -151,60 +149,12 @@ void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
     }
 
     const SpriteSheet * spriteSheet = spriteAnimation->spriteSheet;
-    const SpriteSheetFrame currentFrame = spriteAnimation->frames[spriteAnimation->currentFrame];
+    const Sprite currentFrame = spriteAnimation->frames[spriteAnimation->currentFrame];
 
-    float relativeWidthUnit = 1.f / spriteSheet->xCount;
-    float relativeHeightUnit = 1.f / spriteSheet->yCount;
-
-    float spriteWidth = scale * spriteSheet->width / spriteSheet->xCount / (float)screenWidth;
-    float spriteHeight = scale * spriteSheet->height / spriteSheet->yCount / (float)screenHeight;
-
-    //centered around insertion point
-    float xPosition = x - (spriteWidth / 2);
-    float yPosition = y - (spriteHeight / 2);
-
-    //bind texture
-    glBindTexture(GL_TEXTURE_2D, spriteSheet->texture);
-
-    glBegin(GL_QUADS);
-        //OpenGL
-        //top left
-        glTexCoord2f(relativeWidthUnit * currentFrame.xIndex,          //x
-                    relativeHeightUnit * (currentFrame.yIndex + 1));   //y
-        if(isFlipped) {
-            glVertex2f( xPosition + spriteWidth, yPosition);
-        } else {
-            glVertex2f( xPosition, yPosition);
-        }
-        //top right
-        glTexCoord2f(relativeWidthUnit * (currentFrame.xIndex + 1),    //x
-                    relativeHeightUnit * (currentFrame.yIndex + 1));   //y
-        if(isFlipped) {
-            glVertex2f( xPosition, yPosition);
-        } else {
-            glVertex2f( xPosition + spriteWidth, yPosition);
-        }
-
-        //bot right
-        glTexCoord2f(relativeWidthUnit * (currentFrame.xIndex + 1),    //x
-                    relativeHeightUnit * currentFrame.yIndex);         //y
-        if(isFlipped) {
-            glVertex2f( xPosition, yPosition + spriteHeight);
-        } else {
-            glVertex2f( xPosition + spriteWidth, yPosition + spriteHeight);
-        }
-        //bot left
-        glTexCoord2f(relativeWidthUnit * currentFrame.xIndex,          //x
-                    relativeHeightUnit * currentFrame.yIndex);         //y
-        if(isFlipped) {
-            glVertex2f( xPosition + spriteWidth, yPosition + spriteHeight);
-        } else {
-            glVertex2f( xPosition, yPosition + spriteHeight);
-        }
-    glEnd();
+    RenderSprite(&currentFrame, x, y, screenWidth, screenHeight, scale, isFlipped);
 }
 
-void RenderSprite (Sprite * sprite,
+void RenderSprite (const Sprite * sprite,
                     float x, float y,
                     int screenWidth, int screenHeight, float scale = 1.f,
                     bool isFlipped = false) {
