@@ -21,9 +21,12 @@ SpriteSheet * LoadSpriteSheet(char* filepath, GLenum type, ImageFormat format, S
         printf("failed to load texture at %s", filepath);
     }
 
+    printf("%s\n", SDL_GetPixelFormatName(textureImage[0]->format->format));
+
     glGenTextures( 1, &sheet->texture );
 
     glBindTexture(GL_TEXTURE_2D, sheet->texture);
+    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     sheet->width  = textureImage[0]->w;
     sheet->height = textureImage[0]->h;
@@ -33,23 +36,28 @@ SpriteSheet * LoadSpriteSheet(char* filepath, GLenum type, ImageFormat format, S
     sheet->frameWidth  = sheet->width / sheet->xCount;
     sheet->frameHeight = sheet->height / sheet->yCount;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, sheet->width,
-        //need alpha channel support or something yeahhh
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sheet->width,
           sheet->height, 0, type,
-          GL_UNSIGNED_BYTE, textureImage[0]->pixels);
+          GL_UNSIGNED_BYTE,
+          textureImage[0]->pixels);
 
     //TODO error handling
-    glGetError();
+    if(glGetError() != 0) {
+        printf("OpenGL error");
+    }
 
     /* Linear Filtering */
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     if (textureImage[0]) {
         SDL_FreeSurface(textureImage[0]);
     }
 
     return sheet;
+}
+
+Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier, int x, int y) {
+
 }
 
 SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
@@ -101,6 +109,11 @@ void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation) {
 }
 
 
+void UnloadSprite (Sprite * sprite) {
+
+}
+
+
 void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 float x, float y,
                                 int screenWidth, int screenHeight,
@@ -145,7 +158,7 @@ void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
 
     glBegin(GL_QUADS);
         //tint
-        glColor4d(1, 1, 1, 1);
+        //glColor4f(1, 1, 1, 1);
 
         //OpenGL
         //top left
@@ -202,6 +215,7 @@ SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) {
     }
 
     //Convert surface to screen format
+    /*
     optimizedSurface = SDL_ConvertSurface(loadedSurface, windowSurface->format, NULL);
 
     if(optimizedSurface == NULL) {
@@ -213,4 +227,7 @@ SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) {
     SDL_FreeSurface( loadedSurface );
 
     return optimizedSurface;
+    */
+
+    return loadedSurface;
 }

@@ -31,7 +31,7 @@ void GameInit(SDL_Surface * windowSurface) {
                                     GL_BGRA, BMP, windowSurface, 9, 4);
 
     someGirl = LoadSpriteSheet("../assets/spritesheets/some_girl.png",
-                                GL_BGRA, PNG, windowSurface, 14, 4);
+                                GL_RGBA, PNG, windowSurface, 14, 4);
 
 
     girlMoveRight       = LoadSpriteAnimation (someGirl, "someGirlR", 64, true, 0, 14, 2, 3);
@@ -72,8 +72,7 @@ void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, Temp
     UpdateAndRenderFighter(fighter, &input, screenWidth, screenHeight, msElapsed);
 
     error = glGetError();
-    if( error != GL_NO_ERROR )
-    {
+    if(error != GL_NO_ERROR) {
         printf("OpenGL Error: %s\n", gluErrorString( error ));
     }
 

@@ -39,7 +39,14 @@ struct SpriteAnimation {
 
     float relativeWidthUnit;
     float relativeHeightUnit;
+};
 
+struct Sprite {
+    char* identifier;
+    SpriteSheet* spriteSheet;
+
+    float relativeWidthUnit;
+    float relativeHeightUnit;
 };
 
 SpriteSheet * LoadSpriteSheet (char* filepath, GLenum type, ImageFormat format, SDL_Surface * windowSurface, int xCount, int yCount) ;
@@ -52,6 +59,10 @@ SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
                                         int yStart, int yEnd
                                         );
 
+Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier, int x, int y);
+
+void UnloadSprite (Sprite * sprite);
+
 void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation);
 
 void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
@@ -60,12 +71,13 @@ void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
                                 int msElapsed, float scale,
                                 bool isFlipped);
 
+void RenderSprite (Sprite * sprite,
+                    float x, float y,
+                    int screenWidth, int screenHeight, float scale,
+                    bool isFlipped);
+
+
 void ResetSpriteAnimation (SpriteAnimation * spriteAnimation);
-
-
-void LoadSprite(char* path) ;
-
-void RenderSprite(int screenWidth, int screenHeight) ;
 
 SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) ;
 
