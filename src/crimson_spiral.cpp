@@ -9,6 +9,10 @@
 //TODO find some nice place to store this!
 SpriteSheet * runningDude;
 SpriteSheet * otherDude;
+SpriteSheet * someGirl;
+
+SpriteAnimation * girlMoveRight;
+
 SpriteAnimation * runningDudeAnimation1;
 SpriteAnimation * runningDudeAnimation2;
 
@@ -19,10 +23,18 @@ SpriteAnimation * fighterMoveDown;
 
 Fighter * fighter;
 
-void GameInit() {
+void GameInit(SDL_Surface * windowSurface) {
 
-    runningDude = LoadSpriteSheet("../assets/spritesheets/test_spritesheet.bmp", GL_BGR, 6, 5);
-    otherDude = LoadSpriteSheet("../assets/spritesheets/other_dude.bmp", GL_BGRA, 9, 4);
+    runningDude = LoadSpriteSheet("../assets/spritesheets/test_spritesheet.bmp",
+                                    GL_BGR, BMP, windowSurface, 6, 5);
+    otherDude = LoadSpriteSheet("../assets/spritesheets/other_dude.bmp",
+                                    GL_BGRA, BMP, windowSurface, 9, 4);
+
+    someGirl = LoadSpriteSheet("../assets/spritesheets/some_girl.png",
+                                GL_BGRA, PNG, windowSurface, 14, 4);
+
+
+    girlMoveRight       = LoadSpriteAnimation (someGirl, "someGirlR", 64, true, 0, 14, 2, 3);
 
     fighterMoveRight    = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 3, 4);
     fighterMoveLeft     = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 1, 2);
@@ -51,10 +63,11 @@ void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, Temp
     GLenum error = GL_NO_ERROR;
 
     //Clear color buffer
-    glClear( GL_COLOR_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     RenderSpriteAnimation(runningDudeAnimation1, 0.5f, 0.5f, screenWidth, screenHeight, msElapsed);
     RenderSpriteAnimation(runningDudeAnimation2, -0.5f, -0.5f, screenWidth, screenHeight, msElapsed, 1.5f, true);
+    RenderSpriteAnimation(girlMoveRight, -0.5f, 0.5f, screenWidth, screenHeight, msElapsed, 3.f, false);
 
     UpdateAndRenderFighter(fighter, &input, screenWidth, screenHeight, msElapsed);
 

@@ -1,1 +1,1 @@
-bin/crimson_spiral &
+../bin/crimson_spiral_linux &

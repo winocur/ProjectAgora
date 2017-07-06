@@ -5,6 +5,11 @@
 
 #define MAX_FRAMES 256
 
+enum ImageFormat {
+    BMP,
+    PNG
+};
+
 struct SpriteSheet {
     int width;
     int height;
@@ -37,7 +42,7 @@ struct SpriteAnimation {
 
 };
 
-SpriteSheet * LoadSpriteSheet (char* filepath, GLenum type, int xCount, int yCount) ;
+SpriteSheet * LoadSpriteSheet (char* filepath, GLenum type, ImageFormat format, SDL_Surface * windowSurface, int xCount, int yCount) ;
 
 SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
                                         char* identifier,
@@ -62,6 +67,7 @@ void LoadSprite(char* path) ;
 
 void RenderSprite(int screenWidth, int screenHeight) ;
 
+SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) ;
 
 
 #endif

@@ -3,8 +3,9 @@
 
 #define SDL_MAIN_HANDLED
 
-#include <SDL.h>
-#include <SDL_main.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "sdl_crimson_spiral.h"
@@ -29,17 +30,23 @@ int main(int argc, char *argv[]) {
 	SDL_RendererInfo rendererInfo;
 	SDL_Renderer *renderer;
 	SDL_Window *window;
+	SDL_Surface * windowSurface;
 	SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_OPENGL, &window, &renderer);
 
 	char* windowTitle = new char[64];
 
-	if( window == NULL )
-	{
-		printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+	if(window == NULL) {
+		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 	}
 
-	windowDimension = SdlGetWindowDimension(window);
+	//Initialize PNG loading
+    int imgFlags = IMG_INIT_PNG;
+    if(!(IMG_Init(imgFlags) & imgFlags)) {
+        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+    }
 
+	windowSurface = SDL_GetWindowSurface(window);
+	windowDimension = SdlGetWindowDimension(window);
 
 	SDL_GetRendererInfo(renderer, &rendererInfo);
     if ((rendererInfo.flags & SDL_RENDERER_ACCELERATED) == 0 ||
@@ -60,7 +67,7 @@ int main(int argc, char *argv[]) {
 
 	InitGL (windowDimension.width, windowDimension.height);
 
-	GameInit();
+	GameInit(windowSurface);
 
 	// -- MAIN GAME LOOP -- //
 	bool running = true;
@@ -235,6 +242,8 @@ bool InitGL (int width, int height) {
 	//blending for transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
 
     //Check for error
     error = glGetError();

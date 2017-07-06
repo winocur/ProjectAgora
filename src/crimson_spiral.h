@@ -59,7 +59,7 @@ struct Fighter {
     f32 scale;
 };
 
-void GameInit();
+void GameInit(SDL_Surface * surface);
 
 void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
 void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed);
