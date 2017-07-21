@@ -2,98 +2,104 @@
 #include <GL/gl.h>
 #include <SDL_opengl.h>
 
-#include "sprites.cpp"
 #include "crimson_spiral.h"
 
+#include "sprites.cpp"
 
-//TODO find some nice place to store this!
-SpriteSheet * runningDude;
-SpriteSheet * otherDude;
-SpriteSheet * someGirl;
-SpriteSheet * backgroundSheet;
 
-Sprite * backgroundSprite;
+void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
-SpriteAnimation * girlMoveRight;
+    //initialize game memory
+    GameState * gs = (GameState *)gameMemory->permanentStorage;
 
-SpriteAnimation * runningDudeAnimation1;
-SpriteAnimation * runningDudeAnimation2;
-
-SpriteAnimation * fighterMoveRight;
-SpriteAnimation * fighterMoveLeft;
-SpriteAnimation * fighterMoveUp;
-SpriteAnimation * fighterMoveDown;
-
-Fighter * fighter;
-
-void GameInit(SDL_Surface * windowSurface) {
-
-    runningDude = LoadSpriteSheet("../assets/spritesheets/test_spritesheet.bmp",
+    gs->runningDude = LoadSpriteSheet(gs, "../assets/spritesheets/test_spritesheet.bmp",
                                     GL_BGR, BMP, windowSurface, 6, 5);
-    otherDude = LoadSpriteSheet("../assets/spritesheets/other_dude.bmp",
+    gs->otherDude = LoadSpriteSheet(gs, "../assets/spritesheets/other_dude.bmp",
                                     GL_BGRA, BMP, windowSurface, 9, 4);
 
-    someGirl = LoadSpriteSheet("../assets/spritesheets/some_girl.png",
+    gs->someGirl = LoadSpriteSheet(gs, "../assets/spritesheets/some_girl.png",
                                 GL_RGBA, PNG, windowSurface, 14, 4);
 
-    backgroundSheet = LoadSpriteSheet ("../assets/images/test_bg.png",
+    gs->backgroundSheet = LoadSpriteSheet (gs, "../assets/images/test_bg.png",
                                         GL_RGB, PNG, windowSurface, 1, 1);
 
-    girlMoveRight       = LoadSpriteAnimation (someGirl, "someGirlR", 64, true, 0, 14, 2, 3);
+    gs->barrelSheet = LoadSpriteSheet (gs, "../assets/images/barrel_1.png",
+                                        GL_RGBA, PNG, windowSurface, 1, 1);
 
-    fighterMoveRight    = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 3, 4);
-    fighterMoveLeft     = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 1, 2);
-    fighterMoveUp       = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 0, 1);
-    fighterMoveDown     = LoadSpriteAnimation (otherDude, "otherDude", 64, true, 0, 9, 2, 3);
 
-    runningDudeAnimation1 = LoadSpriteAnimation(runningDude, "runningDude1", 16, true, 0, 6, 0, 5);
-    runningDudeAnimation2 = LoadSpriteAnimation(runningDude, "runningDude2", 32, true, 0, 6, 0, 5);
 
-    backgroundSprite = LoadSprite(backgroundSheet, "background", 0, 0);
+    gs->girlMoveRight       = LoadSpriteAnimation (gs->someGirl, "someGirlr", 64, true, 0, 14, 2, 3);
+    gs->runningDudeAnimation1 = LoadSpriteAnimation(gs->runningDude, "runningDude1", 16, true, 0, 6, 0, 5);
+    gs->runningDudeAnimation2 = LoadSpriteAnimation(gs->runningDude, "runningDude2", 32, true, 0, 6, 0, 5);
+
+    gs->backgroundSprite = LoadSprite(gs->backgroundSheet, "background", 0, 0);
+    gs->barrel = LoadSprite(gs->barrelSheet, "barrel", 0, 0);
 
     audioTest.Initialize();
 
-    fighter = new Fighter();
+    gs->fighter = new Fighter();
+    Fighter * fighter = gs->fighter;
 
-    fighter->moveUp     = fighterMoveUp;
-    fighter->moveDown   = fighterMoveDown;
-    fighter->moveLeft   = fighterMoveLeft;
-    fighter->moveRight  = fighterMoveRight;
-    fighter->lastAnimation = fighterMoveRight;
+    fighter->moveUp     = LoadSpriteAnimation (gs->otherDude, "otherDude", 64, true, 0, 9, 0, 1);
+    fighter->moveDown   = LoadSpriteAnimation (gs->otherDude, "otherDude", 64, true, 0, 9, 2, 3);
+    fighter->moveLeft   = LoadSpriteAnimation (gs->otherDude, "otherDude", 64, true, 0, 9, 1, 2);
+    fighter->moveRight  = LoadSpriteAnimation (gs->otherDude, "otherDude", 64, true, 0, 9, 3, 4);
+    fighter->lastAnimation = fighter->moveRight;
 
-    fighter->position.x = 0.f;
-    fighter->position.y = 0.f;
+    fighter->position.x = 100.f;
+    fighter->position.y = 100.f;
     fighter->position.z = 0.f;
-    fighter->scale = 3.f;
+    fighter->scale = 2.f;
 }
 
-void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) {
+
+void GameUpdateAndRender (GameMemory * gameMemory,
+                        int screenWidth, int screenHeight,
+                        f64 msElapsed, TempGameInput input) {
 
     GLenum error = GL_NO_ERROR;
 
     //Clear color buffer
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    RenderSprite(backgroundSprite, 0, 0, screenWidth, screenHeight, 1.4f);
+    //Pop default matrix onto current matrix
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
 
-    RenderSpriteAnimation(runningDudeAnimation1, 0.5f, 0.5f, screenWidth, screenHeight, msElapsed);
-    RenderSpriteAnimation(runningDudeAnimation2, -0.5f, -0.5f, screenWidth, screenHeight, msElapsed, 1.5f, true);
-    RenderSpriteAnimation(girlMoveRight, -0.5f, 0.5f, screenWidth, screenHeight, msElapsed, 3.f, false);
+    //Move camera to position
+    glTranslatef(input.xCamera, input.yCamera , 0);
 
-    UpdateAndRenderFighter(fighter, &input, screenWidth, screenHeight, msElapsed);
+    //Save default matrix again with camera translation
+    glPushMatrix();
+
+    GameState * gs = (GameState *)gameMemory->permanentStorage;
+
+    RenderSprite(gs->backgroundSprite, screenWidth / 2, (screenHeight / 2), -300, 1.5f);
+
+    //throw in some barrels
+
+    RenderSprite(gs->barrel, 100, -20, -300, 0.20);
+    RenderSprite(gs->barrel, 160, -20, -300, 0.20);
+    RenderSprite(gs->barrel, 230, -40, -200, 0.20);
+
+    UpdateAndRenderFighter(gs->fighter, &input, msElapsed);
+
+    RenderSprite(gs->barrel, 500, 70, 150, 0.20);
+    RenderSprite(gs->barrel, 600, 70, 150, 0.20);
+    RenderSprite(gs->barrel, 700, 70, 150, 0.20);
+
 
     error = glGetError();
     if(error != GL_NO_ERROR) {
         printf("OpenGL Error: %s\n", gluErrorString( error ));
     }
 
-    //game_output_sound(sound_buffer, tone_hz);
 }
 
-void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed) {
+void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, f64 msElapsed) {
 
     float deltaTime = msElapsed / 1000.0f;
-    static const float fighterSpeed = 0.3f;
+    static const float fighterSpeed = 160.f;
 
     SpriteAnimation * animation = fighter->moveRight;
 
@@ -125,20 +131,11 @@ void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int scree
         msElapsed = 0;
     }
 
-    RenderSpriteAnimation(animation, fighter->position.x, fighter->position.y,
-                        screenWidth, screenHeight, msElapsed, fighter->scale, false);
+    RenderSpriteAnimation(animation, msElapsed, fighter->position.x, fighter->position.y, 0.f, fighter->scale, false);
 
     fighter->lastAnimation = animation;
 }
 
 void GameCleanup() {
-    UnloadSpriteAnimation(runningDudeAnimation1);
-    UnloadSpriteAnimation(runningDudeAnimation2);
-    UnloadSpriteAnimation(fighterMoveUp);
-    UnloadSpriteAnimation(fighterMoveLeft);
-    UnloadSpriteAnimation(fighterMoveRight);
-    UnloadSpriteAnimation(fighterMoveDown);
-    //TODO unload sprite sheets
 
-    delete fighter;
 }

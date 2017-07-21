@@ -2,15 +2,67 @@
 #define H_CRIMSONSPIRAL
 
 #include "sprites.h"
+
 // Audio
 #include "Sonos.h"
 Sonos audioTest = { 0, 0, 0, 0, 0, {} };
 //input
 
+struct Vector3 {
+    f64 x, y, z;
+};
+
+struct Fighter {
+    Vector3 position;
+
+    SpriteAnimation* moveRight;
+    SpriteAnimation* moveLeft;
+    SpriteAnimation* moveUp;
+    SpriteAnimation* moveDown;
+    SpriteAnimation* lastAnimation;
+    f32 scale;
+
+    bool idle = true;
+    i32 idleCounter = 200;
+};
+
+struct GameMemory {
+    bool isInitialized = false;
+    u64 permanentStorageSize;
+    void* permanentStorage;
+
+    u64 temporaryStorageSize;
+    void* temporaryStorage;
+};
+
+struct GameState {
+
+    SpriteSheet spriteSheets [256];
+    u32 nextSpriteSheet = 0;
+
+    SpriteSheet * runningDude;
+    SpriteSheet * otherDude;
+    SpriteSheet * someGirl;
+    SpriteSheet * backgroundSheet;
+    SpriteSheet * barrelSheet;
+
+    Sprite * backgroundSprite;
+    Sprite * barrel;
+
+    SpriteAnimation * girlMoveRight;
+
+    SpriteAnimation * runningDudeAnimation1;
+    SpriteAnimation * runningDudeAnimation2;
+
+    Fighter * fighter;
+};
+
 //Temporary for test purpouses
 struct TempGameInput {
     f32 xAxis;
     f32 yAxis;
+    i32 xCamera;
+    i32 yCamera;
 };
 
 //Better version
@@ -44,28 +96,11 @@ struct GameInput {
     GameControllerInput controllers [4];
 };
 
-struct Vector3 {
-    f64 x, y, z;
-};
 
-struct Fighter {
-    Vector3 position;
+void GameInit(SDL_Surface * surface, GameMemory * gameMemory);
 
-    SpriteAnimation* moveRight;
-    SpriteAnimation* moveLeft;
-    SpriteAnimation* moveUp;
-    SpriteAnimation* moveDown;
-    SpriteAnimation* lastAnimation;
-    f32 scale;
-
-    bool idle = true;
-    i32 idleCounter = 200;
-};
-
-void GameInit(SDL_Surface * surface);
-
-void GameUpdateAndRender (int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
-void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, int screenWidth, int screenHeight, f64 msElapsed);
+void GameUpdateAndRender (GameMemory * gameMemory, int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
+void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, f64 msElapsed);
 
 void GameCleanup();
 

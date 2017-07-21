@@ -60,14 +60,14 @@ void UnloadSprite (Sprite * sprite);
 void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation);
 
 void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
-                                float x, float y,
-                                int screenWidth, int screenHeight,
-                                int msElapsed, float scale,
+                                int msElapsed,
+                                float x, float y, float z,
+                                float scale,
                                 bool isFlipped);
 
 void RenderSprite (const Sprite * sprite,
-                    float x, float y,
-                    int screenWidth, int screenHeight, float scale,
+                    float x, float y, float z,
+                    float scale,
                     bool isFlipped);
 
 

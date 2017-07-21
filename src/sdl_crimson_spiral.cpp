@@ -1,18 +1,20 @@
 #define MAX_CONTROLLERS 4
-//#define internal static
 
 #define SDL_MAIN_HANDLED
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <SDL2/SDL_image.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "sdl_crimson_spiral.h"
+#include <math.h>
 
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
+
+#include "sdl_crimson_spiral.h"
 
 #include "crimson_spiral.h"
 #include "crimson_spiral.cpp"
@@ -39,7 +41,7 @@ int main(int argc, char *argv[]) {
 		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 	}
 
-	//Initialize PNG loading
+	//Initialize IMG flags for PNG loading
     int imgFlags = IMG_INIT_PNG;
     if(!(IMG_Init(imgFlags) & imgFlags)) {
         printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
@@ -54,9 +56,8 @@ int main(int argc, char *argv[]) {
         OutputDebug("this is borked!");
     }
 
-
+	// Initialize openGL through SDL
 	SDL_GL_CreateContext(window);
-
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
 
@@ -67,7 +68,14 @@ int main(int argc, char *argv[]) {
 
 	InitGL (windowDimension.width, windowDimension.height);
 
-	GameInit(windowSurface);
+	//TODO catch errors
+	GameMemory memory;
+	memory.permanentStorageSize = MEGABYTES(64);
+	memory.permanentStorage = malloc(memory.permanentStorageSize);
+	memory.temporaryStorageSize = GIGABYTES(1);
+	memory.temporaryStorage = malloc(memory.temporaryStorageSize);
+
+	GameInit(windowSurface, &memory);
 
 	// -- MAIN GAME LOOP -- //
 	bool running = true;
@@ -82,9 +90,13 @@ int main(int argc, char *argv[]) {
 	u64 performanceFrequency = SDL_GetPerformanceFrequency();
 	u64 lastCounter = SDL_GetPerformanceCounter();
 
+	// this is a temporary game input struct
+	// whith mostly test data
 	TempGameInput input;
 	input.xAxis = 0.f;
 	input.yAxis = 0.f;
+	input.xCamera = 0;
+	input.yCamera = 0;
 
 	while(running) {
 
@@ -100,7 +112,7 @@ int main(int argc, char *argv[]) {
 
 		windowDimension = SdlGetWindowDimension(window);
 
-	  	GameUpdateAndRender(windowDimension.width, windowDimension.height, msElapsed, input);
+	  	GameUpdateAndRender(&memory, windowDimension.width, windowDimension.height, msElapsed, input);
 
 		SDL_GL_SwapWindow(window);
 
@@ -199,6 +211,31 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 
 			} else if(keycode == SDLK_x) {
 
+			//arrow keys
+			} else if (keycode == SDLK_DOWN) {
+				if(wasDown) {
+					input->yCamera = 0;
+				} else {
+					input->yCamera = 1;
+				}
+			} else if (keycode == SDLK_UP) {
+				if(wasDown) {
+					input->yCamera = 0;
+				} else {
+					input->yCamera = -1;
+				}
+			} else if (keycode == SDLK_LEFT) {
+				if(wasDown) {
+					input->xCamera = 0;
+				} else {
+					input->xCamera = 1;
+				}
+			} else if (keycode == SDLK_RIGHT) {
+				if(wasDown) {
+					input->xCamera = 0;
+				} else {
+					input->xCamera = -1;
+				}
 			} else if(keycode == SDLK_RETURN) {
 				audioTest.PlayOggFile("../assets/audio/itworks.ogg", audioTest.m_buffer, audioTest.m_format, audioTest.m_freq);
 			} else if(keycode == SDLK_ESCAPE) {
@@ -216,7 +253,7 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 
 bool InitGL (int width, int height) {
 
-	float ratio = (float) width / (float) height;
+	f32 ratio = ((f32) width) / ((f32) height);
 
 	/* Our shading model--Gouraud (smooth). */
     glShadeModel(GL_SMOOTH);
@@ -227,16 +264,39 @@ bool InitGL (int width, int height) {
 	bool success = true;
     GLenum error = GL_NO_ERROR;
 
+	glViewport( 0.f, 0.f, width, height);
 
 	//Initialize Projection Matrix
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
+	//glOrtho( 0.0, width, 0.0, height, 1.0, -1.0 );
+
+	gluPerspective(60.f,
+ 	ratio,
+ 	1,
+ 	1000);
 
 	//Initialize Modelview Matrix
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
-	glShadeModel(GL_SMOOTH);             //Enables Smooth Color Shading
+	//pitagoras only works with 60 degree angle
+	f32 cameraDistance = sqrt((height * height) - (height/2) * (height/2));
+
+	// try D =(h/2)/(tan a) for custom angle
+
+	gluLookAt(
+		// eye position
+		width/2,height/2, cameraDistance,
+		//center of projection
+		width/2,height/2,0,
+		//up vector
+		0, 1, 0);
+
+
+	glPushMatrix();
+
+	//glShadeModel(GL_SMOOTH);             //Enables Smooth Color Shading
 	glEnable(GL_TEXTURE_2D);
 
 	//blending for transparency
