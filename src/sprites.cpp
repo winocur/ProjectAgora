@@ -3,14 +3,8 @@
 #include <GL/gl.h>
 #include <SDL_opengl.h>
 
-//TODO this files have a lot of new (dynamic alocations)
-//It would be better to move to a resizable buffer for this structs
-
-SpriteSheet * LoadSpriteSheet(GameState * gs, char* filepath, GLenum type, ImageFormat format, SDL_Surface * windowSurface,
+SpriteSheet * LoadSpriteSheet(SpriteSheet * sheet, char* filepath, GLenum type, ImageFormat format, SDL_Surface * windowSurface,
      int xCount, int yCount) {
-
-    SpriteSheet * sheet = gs->spriteSheets + gs->nextSpriteSheet;
-    gs->nextSpriteSheet += 1;
 
     /* Create storage space for the texture */
     SDL_Surface * textureImage[1];
@@ -59,25 +53,25 @@ SpriteSheet * LoadSpriteSheet(GameState * gs, char* filepath, GLenum type, Image
     return sheet;
 }
 
-Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier,
+Sprite * LoadSprite (Sprite * sprite, SpriteSheet * spriteSheet, char* identifier,
      int xIndex , int yIndex) {
-
-    Sprite * sprite = new Sprite;
 
     sprite->identifier = identifier;
     sprite->spriteSheet = spriteSheet;
     sprite->xIndex = xIndex;
     sprite->yIndex = yIndex;
+
+    return sprite;
 }
 
-SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
-                                        char* identifier,
-                                        int frameDuration,
-                                        bool isLoop,
-                                        int xStart, int xEnd,
-                                        int yStart, int yEnd) {
+SpriteAnimation * LoadSpriteAnimation ( SpriteAnimation * animation,
+                           SpriteSheet * spriteSheet,
+                           char* identifier,
+                           int frameDuration,
+                           bool isLoop,
+                           int xStart, int xEnd,
+                           int yStart, int yEnd) {
 
-    SpriteAnimation * animation = new SpriteAnimation;
 
     animation->identifier           = identifier;
     animation->isLoop               = isLoop;
@@ -111,17 +105,6 @@ SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
     }
 
     return animation;
-}
-
-void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation) {
-    delete [] spriteAnimation->frames;
-    delete spriteAnimation;
-    spriteAnimation = NULL;
-}
-
-void UnloadSprite (Sprite * sprite) {
-    delete sprite;
-    sprite = NULL;
 }
 
 void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
@@ -222,6 +205,7 @@ void ResetSpriteAnimation (SpriteAnimation * spriteAnimation) {
     spriteAnimation->currentFrame = 0;
     spriteAnimation->frameDurationCounter = 0;
 }
+
 
 SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) {
 

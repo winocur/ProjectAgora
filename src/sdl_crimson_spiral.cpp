@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
 
 	while(running) {
 
+
 		sprintf(windowTitle, "Crimson Spiral (Prototype) fps: %f", FPS);
 		SDL_SetWindowTitle(window, windowTitle);
 
@@ -135,16 +136,18 @@ int main(int argc, char *argv[]) {
 		lastCounter = endCounter;
 	} // -- END GAME LOOP -- //
 
-	delete[] windowTitle;
+	delete [] windowTitle;
+
 	SDL_DestroyWindow (window);
 
-	Cleanup();
+	Cleanup(&memory);
 
 	return 0;
 }
 
-void Cleanup () {
+void Cleanup (GameMemory * gm) {
 		OutputDebug("Cleaning up resources");
+		GameCleanup(gm);
 		SDL_CloseAudio();
 		audioTest.Destroy();
 		SDL_Quit();

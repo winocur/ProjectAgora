@@ -34,7 +34,7 @@ bool HandleEvent(SDL_Event* event, TempGameInput* input);
 
 SdlWindowDimension SdlGetWindowDimension (SDL_Window * window);
 
-void Cleanup ();
+void Cleanup (GameMemory * gm);
 
 void OutputDebug(char * message);
 

@@ -35,26 +35,31 @@ struct GameMemory {
     void* temporaryStorage;
 };
 
+//Static buffers for most memory structs
 struct GameState {
 
     SpriteSheet spriteSheets [256];
     u32 nextSpriteSheet = 0;
+
+    Sprite _sprites [256];
+    u32 nextSprite = 0;
+
+    SpriteAnimation spriteAnimations [256];
+    u32 nextSpriteAnimation;
 
     SpriteSheet * runningDude;
     SpriteSheet * otherDude;
     SpriteSheet * someGirl;
     SpriteSheet * backgroundSheet;
     SpriteSheet * barrelSheet;
-
     Sprite * backgroundSprite;
     Sprite * barrel;
 
     SpriteAnimation * girlMoveRight;
-
     SpriteAnimation * runningDudeAnimation1;
     SpriteAnimation * runningDudeAnimation2;
 
-    Fighter * fighter;
+    Fighter fighter;
 };
 
 //Temporary for test purpouses
@@ -102,6 +107,12 @@ void GameInit(SDL_Surface * surface, GameMemory * gameMemory);
 void GameUpdateAndRender (GameMemory * gameMemory, int screenWidth, int screenHeight, f64 msElapsed, TempGameInput input) ;
 void UpdateAndRenderFighter (Fighter * fighter, TempGameInput * input, f64 msElapsed);
 
-void GameCleanup();
+void GameCleanup(GameMemory * gm);
+
+Sprite          * GetNextSprite (GameState * gs);
+SpriteSheet     * GetNextSpriteSheet (GameState * gs);
+SpriteAnimation * GetNextSpriteAnimation (GameState * gs);
+
+
 
 #endif  /* H_CRIMSONSPIRAL */

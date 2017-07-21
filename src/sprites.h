@@ -43,23 +43,28 @@ struct SpriteAnimation {
     float relativeHeightUnit;
 };
 
-SpriteSheet * LoadSpriteSheet (char* filepath, GLenum type, ImageFormat format, SDL_Surface * windowSurface, int xCount, int yCount) ;
+SpriteSheet *
+LoadSpriteSheet(SpriteSheet * sheet, char* filepath,
+                    GLenum type, ImageFormat format,
+                    SDL_Surface * windowSurface,
+                    int xCount, int yCount);
 
-SpriteAnimation * LoadSpriteAnimation (SpriteSheet * spriteSheet,
-                                        char* identifier,
-                                        int frameDuration,
-                                        bool isLoop,
-                                        int xStart, int xEnd,
-                                        int yStart, int yEnd
-                                        );
+SpriteAnimation *
+LoadSpriteAnimation ( SpriteAnimation * animation,
+                           const SpriteSheet * spriteSheet,
+                           char* identifier,
+                           int frameDuration,
+                           bool isLoop,
+                           int xStart, int xEnd,
+                           int yStart, int yEnd);
 
-Sprite * LoadSprite (SpriteSheet * spriteSheet, char* identifier, int xSheet , int ySheet);
+Sprite *
+LoadSprite (Sprite * sprite,
+                const SpriteSheet * spriteSheet,
+                char* identifier,
+                int xIndex , int yIndex);
 
-void UnloadSprite (Sprite * sprite);
-
-void UnloadSpriteAnimation (SpriteAnimation * spriteAnimation);
-
-void RenderSpriteAnimation (SpriteAnimation * spriteAnimation,
+void RenderSpriteAnimation (const SpriteAnimation * spriteAnimation,
                                 int msElapsed,
                                 float x, float y, float z,
                                 float scale,
@@ -72,6 +77,7 @@ void RenderSprite (const Sprite * sprite,
 
 
 void ResetSpriteAnimation (SpriteAnimation * spriteAnimation);
+
 
 SDL_Surface * LoadPNG (char* filepath, SDL_Surface * windowSurface) ;
 
