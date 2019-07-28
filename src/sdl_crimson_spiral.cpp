@@ -2,9 +2,9 @@
 
 #define SDL_MAIN_HANDLED
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_main.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_main.h>
+#include <SDL_image.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -149,7 +149,6 @@ void Cleanup (GameMemory * gm) {
 		OutputDebug("Cleaning up resources");
 		GameCleanup(gm);
 		SDL_CloseAudio();
-		audioTest.Destroy();
 		SDL_Quit();
 }
 
@@ -240,7 +239,7 @@ bool HandleEvent (SDL_Event * event, TempGameInput * input) {
 					input->xCamera = -1;
 				}
 			} else if(keycode == SDLK_RETURN) {
-				audioTest.PlayOggFile("../assets/audio/itworks.ogg", audioTest.m_buffer, audioTest.m_format, audioTest.m_freq);
+				
 			} else if(keycode == SDLK_ESCAPE) {
 				//single keystroke down
 				if(!wasDown) {

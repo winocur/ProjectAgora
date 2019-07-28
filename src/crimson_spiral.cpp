@@ -39,8 +39,6 @@ void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
     gs->barrel = LoadSprite(GetNextSprite(gs), gs->barrelSheet, "barrel", 0, 0);
 
-    audioTest.Initialize();
-
     Fighter * fighter = &gs->fighter;
 
     fighter->moveUp     = LoadSpriteAnimation (GetNextSpriteAnimation(gs), gs->otherDude, "otherDude", 64, true, 0, 9, 0, 1);

@@ -3,9 +3,6 @@
 
 #include "sprites.h"
 
-// Audio
-#include "Sonos.h"
-Sonos audioTest = { 0, 0, 0, 0, 0, {} };
 //input
 
 struct Vector3 {
