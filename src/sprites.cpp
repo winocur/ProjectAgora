@@ -158,7 +158,9 @@ void RenderSprite (const Sprite * sprite,
     int yPosition = (int)(y - (spriteHeight / 2));
 
     //bind texture
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, spriteSheet->texture);
+    glColor4ub (255, 255, 255, 255);
 
     glBegin(GL_QUADS);
 
@@ -197,7 +199,68 @@ void RenderSprite (const Sprite * sprite,
             glVertex3f( xPosition, yPosition + spriteHeight, z);
         }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
+}
 
+void RenderSpriteToBox (const Sprite* sprite, BoundingBox box, bool isFlipped) {
+    const SpriteSheet * spriteSheet = sprite->spriteSheet;
+
+    float relativeWidthUnit = 1.f / spriteSheet->xCount;
+    float relativeHeightUnit = 1.f / spriteSheet->yCount;
+
+    float spriteWidth = box.width;
+    float spriteHeight = box.height;
+
+    //centered around insertion point
+    //rounded for pixel perfect rendering
+    int xPosition = (int)(box.x);
+    int yPosition = (int)(box.y);
+
+    float z = 0;
+
+    //bind texture
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, spriteSheet->texture);
+    glColor4ub (255, 255, 255, 255);
+
+    glBegin(GL_QUADS);
+
+        //OpenGL
+        //top left
+        glTexCoord2f(relativeWidthUnit * sprite->xIndex,          //x
+                    relativeHeightUnit * (sprite->yIndex + 1));   //y
+        if(isFlipped) {
+            glVertex3f( xPosition + spriteWidth, yPosition, z);
+        } else {
+            glVertex3f( xPosition, yPosition, z);
+        }
+        //top right
+        glTexCoord2f(relativeWidthUnit * (sprite->xIndex + 1),    //x
+                    relativeHeightUnit * (sprite->yIndex + 1));   //y
+        if(isFlipped) {
+            glVertex3f( xPosition, yPosition, z);
+        } else {
+            glVertex3f( xPosition + spriteWidth, yPosition, z);
+        }
+
+        //bot right
+        glTexCoord2f(relativeWidthUnit * (sprite->xIndex + 1),    //x
+                    relativeHeightUnit * sprite->yIndex);         //y
+        if(isFlipped) {
+            glVertex3f( xPosition, yPosition + spriteHeight, z);
+        } else {
+            glVertex3f( xPosition + spriteWidth, yPosition + spriteHeight, z);
+        }
+        //bot left
+        glTexCoord2f(relativeWidthUnit * sprite->xIndex,          //x
+                    relativeHeightUnit * sprite->yIndex);         //y
+        if(isFlipped) {
+            glVertex3f( xPosition + spriteWidth, yPosition + spriteHeight, z);
+        } else {
+            glVertex3f( xPosition, yPosition + spriteHeight, z);
+        }
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
 }
 
 

@@ -75,6 +75,9 @@ void RenderSprite (const Sprite * sprite,
                     float scale,
                     bool isFlipped);
 
+void RenderSpriteToBox (const Sprite* sprite, 
+                        BoundingBox box, 
+                        bool isFlipped = false);
 
 void ResetSpriteAnimation (SpriteAnimation * spriteAnimation);
 
