@@ -38,14 +38,9 @@ struct GameInputFrame {
     u8 middleButton;
 };
 
-struct SdlWindowDimension {
-    int width;
-    int height;
-};
-
 bool HandleEvent(SDL_Event* event, GameInputFrame* input);
 
-SdlWindowDimension SdlGetWindowDimension (SDL_Window * window);
+WindowDimension SdlGetWindowDimension (SDL_Window * window);
 
 void Cleanup (GameMemory * gm);
 

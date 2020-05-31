@@ -1,6 +1,11 @@
 #ifndef H_AGORA
 #define H_AGORA
 
+struct WindowDimension {
+    int width;
+    int height;
+};
+
 struct GameMemory {
     bool isInitialized = false;
     u64 permanentStorageSize;
@@ -27,8 +32,6 @@ enum GamePhase {
 #include "simulation.h"
 #include "ui.h"
 #include <math.h> 
-
-
 
 //Better version
 struct GameButtonState {
@@ -108,7 +111,7 @@ GameState* gameState;
 
 void GameInit(SDL_Surface * surface, GameMemory * gameMemory);
 
-void GameUpdateAndRender (GameMemory * gameMemory, int screenWidth, int screenHeight, f64 msElapsed, GameInput input) ;
+void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDimension, f64 msElapsed, GameInput input) ;
 
 void GameCleanup(GameMemory * gm);
 

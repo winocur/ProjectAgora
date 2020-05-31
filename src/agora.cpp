@@ -4,6 +4,8 @@
 
 #include "agora.h"
 
+WindowDimension windowDimension;
+
 #include "sprites.cpp"
 #include "input.cpp"
 #include "text.cpp"
@@ -20,22 +22,25 @@ void TestButton () {
 
 void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
+
     //initialize game memory
     GameState * gs = (GameState *)gameMemory->permanentStorage;
     gs->camera.targetZoom = 1;
     gs->camera.actualZoom = 1;
-
+    gameState = gs;
+    
     // load icons
     SpriteSheet* sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/demolish.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->demolishIcon = LoadSprite(&gs->_sprites[gs->nextSprite++],sheet, "demolish", 0, 0);     
 
+    
     sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/move.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->moveIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "move", 0, 0);
 
     sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/upgrade.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->upgradeIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
 
-
+    
     // create grid
     PopulateGrid(&gs->grid);
     grid = &gs->grid;
@@ -50,15 +55,14 @@ void CenterCamera (Building* building) {
     gameState->camera.targetTranslation = ScreenToProjection(GetPosition (building, grid)) * -1 - Vector2 { 0, building->roofHeight };
 }
 
-void GameUpdateAndRender (GameMemory * gameMemory,
-                        int screenWidth, int screenHeight,
-                        f64 msElapsed, GameInputFrame input) {
+void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
+
+    
+    windowDimension = windowDim;
 
     GLenum error = GL_NO_ERROR;
 
     float deltaTime = msElapsed / 1000.0;
-
-    windowDimension = { screenWidth, screenHeight };
 
     // input
     MouseEvents mouseEvents = ProcessMouseInput(&input);
@@ -72,7 +76,7 @@ void GameUpdateAndRender (GameMemory * gameMemory,
     if (camera->targetZoom < 0.5) camera->targetZoom = 0.5f;
 
     Vector2 worldMousePosition = mouseEvents.mousePosition;
-    worldMousePosition = worldMousePosition - Vector2 { screenWidth / 2, screenHeight / 2 };
+    worldMousePosition = worldMousePosition - Vector2 { windowDimension.width / 2, windowDimension.height / 2 };
     worldMousePosition = worldMousePosition * camera->actualZoom;
     worldMousePosition = worldMousePosition - camera->actualTranslation;
     
@@ -151,7 +155,7 @@ void GameUpdateAndRender (GameMemory * gameMemory,
     glPushMatrix();
 
     // world space projection
-    glOrtho( -screenWidth * camera->actualZoom / 2, screenWidth * camera->actualZoom / 2, -screenHeight * camera->actualZoom / 2, screenHeight * camera->actualZoom / 2, 1.0, -1.0 );
+    glOrtho( -windowDimension.width * camera->actualZoom / 2, windowDimension.width * camera->actualZoom / 2, -windowDimension.height * camera->actualZoom / 2, windowDimension.height * camera->actualZoom / 2, 1.0, -1.0 );
     glTranslatef(camera->actualTranslation.x,camera->actualTranslation.y, 0);  
       
 
@@ -172,7 +176,7 @@ void GameUpdateAndRender (GameMemory * gameMemory,
 
     // World space UI
     glPushMatrix();
-    glOrtho( -screenWidth / 2, screenWidth / 2, -screenHeight / 2, screenHeight / 2, 1.0, -1.0 );
+    glOrtho( -windowDimension.width / 2, windowDimension.width / 2, -windowDimension.height / 2, windowDimension.height / 2, 1.0, -1.0 );
 
     glTranslatef(camera->actualTranslation.x / camera->actualZoom, camera->actualTranslation.y / camera->actualZoom, 0);  
 
@@ -180,7 +184,7 @@ void GameUpdateAndRender (GameMemory * gameMemory,
     glPopMatrix();
 
     // screen space UI
-    glOrtho( 0, screenWidth, 0, screenHeight, 1.0, -1.0 );
+    glOrtho( 0, windowDimension.width, 0, windowDimension.height, 1.0, -1.0 );
     DrawScreenSpaceUI(&gs->session, gs->mainFont, gameMemory) ;
 
     
