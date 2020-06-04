@@ -56,7 +56,6 @@ void CenterCamera (Building* building) {
 }
 
 void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
-
     
     windowDimension = windowDim;
 
@@ -115,6 +114,8 @@ void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f6
 
         //gs->selectedBuilding->gridX = selected.indexX;
         //gs->selectedBuilding->gridY = selected.indexY;
+    } else {
+        OnHoverUI(mouseEvents.mousePosition, gs->buttons, gs->buttonCounter);
     }
 
     error = glGetError();
@@ -122,8 +123,14 @@ void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f6
         printf("OpenGL Error: %s\n", gluErrorString( error ));
     }
 
-    // clears temporary memory in frame bound
-    gameMemory->temporaryStorageCurrent = gameMemory->temporaryStorage; 
+    // clears temporary memory
+    // We're doing this here instead of the frame boundary so buttons
+    // created in the last frame can be interacted at the beggining of this
+    // one creating a one-frame retained mode of sorts
+    // that gets thrown away every frame
+    gameMemory->temporaryStorageCurrent = gameMemory->temporaryStorage;
+
+    // allocate space for up to 64 buttons to be filled by the menu rendering.
     gameState->buttons = (UIButton*)gameMemory->temporaryStorageCurrent;
     gameState->buttonCounter = 0;
     gameMemory->temporaryStorageCurrent += sizeof(UIButton) * 64;
@@ -185,8 +192,8 @@ void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f6
 
     // screen space UI
     glOrtho( 0, windowDimension.width, 0, windowDimension.height, 1.0, -1.0 );
+    
     DrawScreenSpaceUI(&gs->session, gs->mainFont, gameMemory) ;
-
     
 }
 

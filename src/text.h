@@ -4,6 +4,7 @@
 enum UIAnchor {
     TOP_LEFT,
     TOP_RIGHT,
+    BOTTOM_CENTER
 };
 
 struct Text {

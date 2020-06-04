@@ -18,7 +18,7 @@ void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition
     DrawPanel(panelBBox, { 0, 0, 0, 200 });
 
     //printf("PanelBBox: [%f, %f, %f, %f]", panelBBox.x, panelBBox.y, panelBBox.width, panelBBox.height);
-    RegisterButton(UIButton { panelBBox, PanelHit }, true);
+    RegisterButton(UIButton { panelBBox, PanelHit, NULL }, true);
 
     Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
     int accumulatedYPadding = 0;
@@ -57,17 +57,17 @@ void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition
     BoundingBox buttonBox = BoundingBox {origin.x + accumulatedXPadding, origin.y - accumulatedYPadding, 40, 40 };
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->demolishIcon, buttonBox);
-    RegisterButton({ buttonBox, PressDemolish }, true);
+    RegisterButton(UIButton { buttonBox, PressDemolish, GetDemolisionCost }, true);
 
     buttonBox.x += 50;
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->upgradeIcon, buttonBox);
-    RegisterButton (UIButton { buttonBox, PressUpgrade }, true);
+    RegisterButton (UIButton { buttonBox, PressUpgrade, GetUpgradeCost }, true);
 
     buttonBox.x += 50;
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->moveIcon, buttonBox);
-    RegisterButton(UIButton { buttonBox, PressMove }, true);
+    RegisterButton(UIButton { buttonBox, PressMove, GetMoveCost }, true);
 }
 
 void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory, float scale) {
@@ -138,7 +138,9 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
 
 void DrawScreenSpaceUI (GameSession* session, TTF_Font* mainFont, GameMemory* memory) {
     
+    DrawTickTimer (session);
     DrawMainPanel(session, mainFont, memory);
+    DrawCostContainer (session, mainFont, memory);
 }
 
 bool OnClicUI (Vector2 point, UIButton * buttons, int buttonCounter) {
@@ -156,6 +158,21 @@ bool OnClicUI (Vector2 point, UIButton * buttons, int buttonCounter) {
     return false;
 }
 
+bool OnHoverUI (Vector2 point, UIButton * buttons, int buttonCounter) {
+
+    for (int i = buttonCounter - 1; i >= 0; i--) {
+        UIButton * button = buttons + i;
+        if (CheckCollision(point, button->box)) {
+            gameState->hoverButton = button;
+            return true;
+        }
+    }
+
+    // we null the hover button to signal the UI not to draw cost panel
+    gameState->hoverButton = NULL;
+    return false;
+}
+
 BoundingBox TransformBox (BoundingBox box, UIAnchor anchor) {
 
     switch (anchor) {
@@ -163,6 +180,24 @@ BoundingBox TransformBox (BoundingBox box, UIAnchor anchor) {
             return {
                 box.x,
                 windowDimension.height - box.y - box.height, 
+                box.width,
+                box.height,
+            };
+        }
+        
+        case TOP_RIGHT : {
+            return {
+                windowDimension.width - box.x - box.width,
+                windowDimension.height - box.y - box.height, 
+                box.width,
+                box.height,
+            };
+        }
+
+        case BOTTOM_CENTER : {
+            return {
+                (windowDimension.width / 2) - (box.width / 2) + box.x,
+                box.y, 
                 box.width,
                 box.height,
             };
@@ -212,6 +247,47 @@ Vector2 WorldUIToScreenPosition (Vector2 position) {
     result.x += windowDimension.width / 2;
     result.y += windowDimension.height / 2;
     return result;
+}
+
+void DrawCostContainer (GameSession* session, TTF_Font* mainFont, GameMemory* memory, float scale) {
+
+    if (gameState->hoverButton == NULL) return;
+
+    const UIButton* button = gameState->hoverButton;
+    if(button->costs == NULL) return;
+
+    Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
+        
+    Resources costs = button->costs(selectedBuilding);
+    BoundingBox panelBBox = TransformBox(BoundingBox {0,0,500,100} , BOTTOM_CENTER);
+    DrawPanel(panelBBox, {100,0,0,150});
+    
+    Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
+    char textBuffer [64];
+    Text text;
+
+    int accumulatedYPadding = 20;
+    
+    int length = sprintf(textBuffer, "Energy: %i", costs.energy);
+    CreateText(&text, textBuffer, mainFont);
+    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 30 });
+
+    length = sprintf(textBuffer, "Produc: %i", costs.production);
+    accumulatedYPadding += 20;
+    CreateText(&text, textBuffer, mainFont);
+    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
+
+    length = sprintf(textBuffer, "Commer: %i", costs.exchange);
+    accumulatedYPadding += 20;
+    CreateText(&text, textBuffer, mainFont);
+    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
+}
+
+void DrawTickTimer (GameSession* session) {
+    f64 percentaje = session->timer / session->tickTime;
+
+    DrawPanel(TransformBox({10,10,200,40 }, TOP_RIGHT), {100,0,0,230 });
+    DrawPanel(TransformBox({10 + 200 - 200 * percentaje,15, 200 * percentaje, 30 }, TOP_RIGHT), {0,255,0,255 });
 }
 
 void PressDemolish () {

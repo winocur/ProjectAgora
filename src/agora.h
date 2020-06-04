@@ -89,6 +89,8 @@ struct GameState {
     UIButton* buttons;
     u32 buttonCounter;
 
+    UIButton* hoverButton;
+
     // fonts?
     TTF_Font* mainFont;
 
@@ -96,7 +98,6 @@ struct GameState {
     Sprite* demolishIcon;
     Sprite* upgradeIcon;
     Sprite* moveIcon;
-    
     
     Camera camera;
 
