@@ -28,8 +28,6 @@ enum GamePhase {
 #include "ui.h"
 #include <math.h> 
 
-
-
 //Better version
 struct GameButtonState {
     int halfTransitionCount;

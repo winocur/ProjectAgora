@@ -183,7 +183,7 @@ void GameUpdateAndRender (GameMemory * gameMemory,
     glOrtho( 0, screenWidth, 0, screenHeight, 1.0, -1.0 );
     DrawScreenSpaceUI(&gs->session, gs->mainFont, gameMemory) ;
 
-    
+    //EOF
 }
 
 void GameCleanup(GameMemory * gm) {

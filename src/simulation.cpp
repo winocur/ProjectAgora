@@ -25,8 +25,6 @@ GameSession StartGame() {
 }
 
 void ProcessTick (GameSession* session) {
-    printf ("Tick!\n");
-
     session->timer = 0;
     session->population -= (int)(GetToxicity(session) * 1000);
 

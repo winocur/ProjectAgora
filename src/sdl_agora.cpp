@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) {
         printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
     }
 
-	
-
 	windowSurface = SDL_GetWindowSurface(window);
 	windowDimension = SdlGetWindowDimension(window);
 

@@ -76,7 +76,9 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     Text* text;
     int length;
     // background
-    DrawPanel(TransformBox({0, 0, 200, 200}, TOP_LEFT), {0, 0, 0, 200 });
+    BoundingBox panelBBox = TransformBox(BoundingBox {0, 0, 200, 200}, TOP_LEFT);
+    DrawPanel(panelBBox, Color {0, 0, 0, 200 });
+    RegisterButton(UIButton { panelBBox, PanelHit }, false);
 
     char textBuffer [64];
     length = sprintf(textBuffer, "Population: %i", session->population);

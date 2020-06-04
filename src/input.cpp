@@ -3,8 +3,7 @@
 
 const f32 displacementThreshold = 2.0;
 
-MouseEvents
-ProcessMouseInput (const GameInputFrame* inputFrame) {
+MouseEvents ProcessMouseInput (const GameInputFrame* inputFrame) {
 
     static GameInputState lastState;
 
@@ -65,8 +64,5 @@ ProcessMouseInput (const GameInputFrame* inputFrame) {
     }
 
     lastState = newState;
-
-
-
     return events;
 }

@@ -1,8 +1,6 @@
 #ifndef H_INPUT
 #define H_INPUT
 
-
-
 enum MouseButtonEvent {
     NONE,
     CLIC,
