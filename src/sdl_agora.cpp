@@ -16,9 +16,6 @@
 #include <GL/gl.h>
 
 #include "sdl_agora.h"
-
-SdlWindowDimension windowDimension;
-
 #include "agora.h"
 #include "agora.cpp"
 
@@ -41,7 +38,7 @@ int main(int argc, char *argv[]) {
 	SDL_Renderer *renderer;
 	SDL_Window *window;
 	SDL_Surface * windowSurface;
-	SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_OPENGL, &window, &renderer);
+	SDL_CreateWindowAndRenderer(1280, 720, SDL_WINDOW_OPENGL, &window, &renderer);
 
 	char* windowTitle = new char[64];
 
@@ -126,7 +123,7 @@ int main(int argc, char *argv[]) {
 		SDL_GetMouseState(&mouseX, &mouseY);
 		input.mousePosition = { ((float)mouseX), windowDimension.height - ((float)mouseY) };
 
-	  	GameUpdateAndRender(&memory, windowDimension.width, windowDimension.height, msElapsed, input);
+	  	GameUpdateAndRender(&memory, windowDimension, msElapsed, input);
 
 		SDL_GL_SwapWindow(window);
 
@@ -377,8 +374,8 @@ bool InitGL (int width, int height) {
     return success;
 }
 
-SdlWindowDimension SdlGetWindowDimension (SDL_Window *window) {
-	SdlWindowDimension result;
+WindowDimension SdlGetWindowDimension (SDL_Window *window) {
+	WindowDimension result;
     SDL_GetWindowSize(window, &result.width, &result.height);
     return result;
 }

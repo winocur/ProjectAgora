@@ -18,10 +18,8 @@ void PopulateGrid (TileGrid * grid) {
         for (int j = 0; j < grid->width; j++) {
 
             float x = grid->center.x - (grid->tileWidth * (grid->width / 2.0)) + grid->tileWidth * i;
-
             float y = grid->center.y - (grid->tileHeight * (grid->height / 2.0)) + grid->tileHeight * j;
             
-            //printf("Tile[%i,%i] : (%f,%f)\n", i, j, x, y);
             BoundingBox box = { x - grid->tileWidth / 2.0, y - grid->tileHeight / 2.0, grid->tileWidth, grid->tileHeight};
 
             grid->tiles[i][j] = { { x, y }, box, i, j };

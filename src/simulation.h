@@ -36,4 +36,10 @@ Resources GetResourceIO (const GameSession* session);
 
 u32 GetHousing (const GameSession* session);
 
+Resources GetUpgradeCost (const Building* building);
+
+Resources GetDemolisionCost (const Building* building);
+
+Resources GetMoveCost (const Building* building);
+
 #endif

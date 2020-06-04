@@ -1,6 +1,11 @@
 #ifndef H_AGORA
 #define H_AGORA
 
+struct WindowDimension {
+    int width;
+    int height;
+};
+
 struct GameMemory {
     bool isInitialized = false;
     u64 permanentStorageSize;
@@ -84,6 +89,8 @@ struct GameState {
     UIButton* buttons;
     u32 buttonCounter;
 
+    UIButton* hoverButton;
+
     // fonts?
     TTF_Font* mainFont;
 
@@ -91,7 +98,6 @@ struct GameState {
     Sprite* demolishIcon;
     Sprite* upgradeIcon;
     Sprite* moveIcon;
-    
     
     Camera camera;
 
@@ -106,7 +112,7 @@ GameState* gameState;
 
 void GameInit(SDL_Surface * surface, GameMemory * gameMemory);
 
-void GameUpdateAndRender (GameMemory * gameMemory, int screenWidth, int screenHeight, f64 msElapsed, GameInput input) ;
+void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDimension, f64 msElapsed, GameInput input) ;
 
 void GameCleanup(GameMemory * gm);
 

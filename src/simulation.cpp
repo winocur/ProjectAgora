@@ -59,3 +59,15 @@ Resources GetResourceIO (const GameSession* session) {
 
     return resources;
 }
+
+Resources GetUpgradeCost (const Building* building) {
+    return Resources { 200, 100, 100 };
+}
+
+Resources GetDemolisionCost (const Building* building) {
+    return Resources { 150, 20, 20 };
+}
+
+Resources GetMoveCost (const Building* building) {
+    return Resources { 80, 50, 50 };
+}

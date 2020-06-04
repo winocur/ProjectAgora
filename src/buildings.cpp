@@ -237,5 +237,8 @@ BuildingData GetBuildingData (int classId) {
                 8 // evolves into
             };
         } break;
+
+        printf("ERROR: No building for id %i\n", classId);
+        return BuildingData ();
     }
 }
