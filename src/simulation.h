@@ -42,4 +42,8 @@ Resources GetDemolisionCost (const Building* building);
 
 Resources GetMoveCost (const Building* building);
 
+bool UpgradeBuilding (Building* building);
+
+bool DemolishBuilding (Building* building);
+
 #endif

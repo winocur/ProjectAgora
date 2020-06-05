@@ -5,14 +5,15 @@ void RenderBuilding (const Building* building, const TileGrid* grid) {
 
     Tile tile = grid->tiles[building->gridX][building->gridY];
 
-    int roof = building->roofHeight;
+    int roof = building->data.height;
+    int size = building->data.size;
 
-    Vector2 bottomLeft = ScreenToProjection( { tile.center.x - grid->tileWidth / 2 - building->size * grid->tileWidth, tile.center.y - grid->tileHeight / 2 - building->size * grid->tileHeight });
-    Vector2 topLeft = ScreenToProjection( { tile.center.x - grid->tileWidth / 2 - building->size * grid->tileWidth, tile.center.y + grid->tileHeight / 2 + building->size * grid->tileHeight });
-    Vector2 topRight = ScreenToProjection( { tile.center.x + grid->tileWidth / 2 + building->size * grid->tileWidth, tile.center.y + grid->tileHeight / 2 + building->size * grid->tileHeight });
-    Vector2 bottomRight = ScreenToProjection( { tile.center.x + grid->tileWidth / 2 + building->size * grid->tileWidth, tile.center.y - grid->tileHeight / 2 - building->size * grid->tileHeight });
+    Vector2 bottomLeft = ScreenToProjection( { tile.center.x - grid->tileWidth / 2  - size * grid->tileWidth, tile.center.y - grid->tileHeight / 2 - size * grid->tileHeight }); 
+    Vector2 topLeft = ScreenToProjection( { tile.center.x - grid->tileWidth / 2     - size * grid->tileWidth, tile.center.y + grid->tileHeight / 2 + size * grid->tileHeight }); 
+    Vector2 topRight = ScreenToProjection( { tile.center.x + grid->tileWidth / 2    + size * grid->tileWidth, tile.center.y + grid->tileHeight / 2 + size * grid->tileHeight }); 
+    Vector2 bottomRight = ScreenToProjection( { tile.center.x + grid->tileWidth / 2 + size * grid->tileWidth, tile.center.y - grid->tileHeight / 2 - size * grid->tileHeight });
 
-    Color baseColor = building->color;
+    Color baseColor = building->data.color;
     Color midColor = baseColor + Color { - 50, -50, -50, 0};
     Color darkColor = baseColor + Color { - 100, -100, -100, 0};
 
@@ -95,7 +96,7 @@ Building* QueryBuilding (const Tile* tile, Building* buildings, const u32 buildi
 
         if(building->state == DESTROYED) continue;
         
-        int size = building->size;
+        int size = building->data.size;
 
         int relativeGridX = abs(building->gridX - tile->indexX);
         int relativeGridY = abs(building->gridY - tile->indexY);
@@ -140,8 +141,8 @@ void SortBuildings (const Building* buildings, Building* sortedBuildings, u32 bu
             Building b = sortedBuildings [j+1];
 
             //@TODO fix, should check the difference so it wont cancel out
-            if(a.gridY + a.size > b.gridY + b.size || 
-              a.gridX - a.size < b.gridX - b.size) {
+            if(a.gridY + a.data.size > b.gridY + b.data.size || 
+              a.gridX - a.data.size < b.gridX - b.data.size) {
 
                 temp = b;
                 sortedBuildings[j+1] = a;
@@ -151,28 +152,26 @@ void SortBuildings (const Building* buildings, Building* sortedBuildings, u32 bu
     }
 }
 
-Building CreateBuilding (int classId, int size, Color color, int gridX, int gridY, int roofHeight) {
+Building CreateBuilding (BuildingType type, int gridX, int gridY) {
     
     Building building;
-    building.classId = classId;
     building.instanceId = gameState->nextBuildingInstanceId;
     gameState->nextBuildingInstanceId += 1;
-    building.size = size;
-    building.color = color;
     building.gridX = gridX;
     building.gridY = gridY;
-    building.roofHeight = roofHeight;
-    building.data = GetBuildingData(classId);
+    building.data = GetBuildingData(type);
     return building;
 }
 
-BuildingData GetBuildingData (int classId) {
+BuildingData GetBuildingData (BuildingType type) {
     
-    switch (classId)
+    BuildingData data;
+
+    switch (type)
     {
-        // HOUSING 1
-        case 1: {
-            return BuildingData {
+        // HOUSING 0
+        case BUILDING_BLOCKS: {
+            data = BuildingData {
                 "Building Blocks",
                 20,  // toxicity
                 500000, // housing
@@ -182,14 +181,72 @@ BuildingData GetBuildingData (int classId) {
                     -40  // exchange
                 },
                 3,  //clumping
-                classId,
-                5 // evolves into
+                1,  //size
+                Color {100, 100, 100, 200},
+                80, // height
+                SUBURBAN_HOUSES // evolution
             };
         } break;
         
-        // ENERGY 1
-        case 2: {
-            return BuildingData {
+        // HOUSING 1
+        case SUBURBAN_HOUSES: {
+            data = BuildingData {
+                "Suburban Houses",
+                12,  // toxicity
+                200000, // housing
+                Resources {
+                    -32, // energy
+                    -42, // production
+                    -32  // exchange
+                },
+                3,  //clumping
+                1,  //size
+                Color {80, 130, 100, 200},
+                70, // height
+                COMMUNAL_HOUSING // evolution
+            };
+        } break;
+
+        // HOUSING 2
+        case COMMUNAL_HOUSING : {
+            data = BuildingData {
+                "Communal Housing",
+                8,  // toxicity
+                100000, // housing
+                Resources {
+                    -22, // energy
+                    -35, // production
+                    -22  // exchange
+                },
+                3,  //clumping
+                1,  //size
+                Color {80, 150, 100, 200},
+                60, // height
+                TECHNO_KAUS // evolution
+            };
+        } break;
+
+        // HOUSING 3
+        case TECHNO_KAUS : {
+            data = BuildingData {
+                "Techno-Kaus",
+                3,  // toxicity
+                500000, // housing
+                Resources {
+                    -18, // energy
+                    -25, // production
+                    -18  // exchange
+                },
+                3,  //clumping
+                1,  //size
+                Color {100, 200, 100, 220},
+                50 // height
+            };
+        } break;
+
+        // ENERGY 0
+        case COAL_PLANT: {
+            data = BuildingData {
                 "Coal Power Plant",
                 40,  // toxicity
                 0, // housing
@@ -199,14 +256,69 @@ BuildingData GetBuildingData (int classId) {
                     -40  // exchange
                 },
                 3,  //clumping
-                classId,
-                6 // evolves into
+                2, //size
+                Color {130, 100, 100, 220},
+                80 // height
             };
         } break;
 
-        // PRODUCTION 1
-        case 3: {
-            return BuildingData {
+        // ENERGY 1
+        case NATURAL_GAS: {
+            data = BuildingData {
+                "Natural Gas Extractor",
+                30,  // toxicity
+                0, // housing
+                Resources {
+                    400, // energy
+                    -50, // production
+                    -30  // exchange
+                },
+                3,  //clumping
+                2, //size
+                Color {150, 100, 100, 220},
+                70 // height
+            };
+        } break;
+
+        // ENERGY 2
+        case NUCLEAR_PLANT: {
+            data = BuildingData {
+                "Nuclear Fission Plant",
+                20,  // toxicity
+                0, // housing
+                Resources {
+                    300, // energy
+                    -40, // production
+                    -25  // exchange
+                },
+                3,  //clumping
+                2, //size
+                Color {170, 100, 90, 220},
+                60 // height
+            };
+        } break;
+
+        // ENERGY 3
+        case SOLAR_AND_WIND: {
+            data = BuildingData {
+                "Solar and Wind",
+                8,  // toxicity
+                0, // housing
+                Resources {
+                    150, // energy
+                    -20, // production
+                    -12  // exchange
+                },
+                3,  //clumping
+                2, //size
+                Color {130, 80, 130, 220},
+                40 // height
+            };
+        } break;
+
+        // PRODUCTION 0
+        case INDUSTRIAL_REFINERY: {
+            data = BuildingData {
                 "Factories and Refineries",
                 30,  // toxicity
                 0, // housing
@@ -216,14 +328,17 @@ BuildingData GetBuildingData (int classId) {
                     -60  // exchange
                 },
                 3,  //clumping
-                classId,
-                7 // evolves into
+                2, //size
+                Color { 50, 50, 50, 220},
+                70 // height
             };
          } break;
 
+
+
         // EXCHANGE 1
-        case 4: {
-            return BuildingData {
+        case BUSINESS_OFFICES : {
+            data = BuildingData {
                 "Business Towers",
                 30,  // toxicity
                 0, // housing
@@ -233,12 +348,14 @@ BuildingData GetBuildingData (int classId) {
                     300  // exchange
                 },
                 3,  //clumping
-                classId,
-                8 // evolves into
+                1, // size
+                Color { 150, 150, 150, 220},
+                90 // height
             };
         } break;
 
-        printf("ERROR: No building for id %i\n", classId);
-        return BuildingData ();
+        data.type = type;
+
+        return data;
     }
 }
