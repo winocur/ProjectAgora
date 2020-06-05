@@ -47,6 +47,8 @@ void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
     // load fonts
     gs->mainFont = LoadFont("../assets/fonts/sansation/Sansation-Regular.ttf", 15);
+    gs->titleFont = LoadFont ("../assets/fonts/sansation/Sansation-Regular.ttf", 20);
+    
     gs->selectedBuildingId = -1;
     gs->session = StartGame();
 }

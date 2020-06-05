@@ -93,6 +93,7 @@ struct GameState {
 
     // fonts?
     TTF_Font* mainFont;
+    TTF_Font* titleFont;
 
     Sprite* backgroundSprite;
     Sprite* demolishIcon;

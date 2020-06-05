@@ -18,7 +18,7 @@ void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition
     DrawPanel(panelBBox, { 0, 0, 0, 200 });
 
     //printf("PanelBBox: [%f, %f, %f, %f]", panelBBox.x, panelBBox.y, panelBBox.width, panelBBox.height);
-    RegisterButton(UIButton { panelBBox, PanelHit, NULL }, true);
+    RegisterButton(UIButton { "Panel", panelBBox, PanelHit, NULL }, true);
 
     Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
     int accumulatedYPadding = 0;
@@ -57,17 +57,17 @@ void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition
     BoundingBox buttonBox = BoundingBox {origin.x + accumulatedXPadding, origin.y - accumulatedYPadding, 40, 40 };
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->demolishIcon, buttonBox);
-    RegisterButton(UIButton { buttonBox, PressDemolish, GetDemolisionCost }, true);
+    RegisterButton(UIButton { "Dismantle", buttonBox, PressDemolish, GetDemolisionCost }, true);
 
     buttonBox.x += 50;
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->upgradeIcon, buttonBox);
-    RegisterButton (UIButton { buttonBox, PressUpgrade, GetUpgradeCost }, true);
+    RegisterButton (UIButton { "Upgrade", buttonBox, PressUpgrade, GetUpgradeCost }, true);
 
     buttonBox.x += 50;
     DrawPanel(buttonBox, {255,255,255,255});
     RenderSpriteToBox(gameState->moveIcon, buttonBox);
-    RegisterButton(UIButton { buttonBox, PressMove, GetMoveCost }, true);
+    RegisterButton(UIButton { "Move", buttonBox, PressMove, GetMoveCost }, true);
 }
 
 void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory, float scale) {
@@ -78,7 +78,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     // background
     BoundingBox panelBBox = TransformBox(BoundingBox {0, 0, 200, 200}, TOP_LEFT);
     DrawPanel(panelBBox, Color {0, 0, 0, 200 });
-    RegisterButton(UIButton { panelBBox, PanelHit }, false);
+    RegisterButton(UIButton { "Panel", panelBBox, PanelHit }, false);
 
     char textBuffer [64];
     length = sprintf(textBuffer, "Population: %i", session->population);
@@ -106,7 +106,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     memory->temporaryStorageCurrent += sizeof(Text*);
 
     accumulatedYPadding += 30;
-    CreateText(text, "RESOURCES", mainFont);
+    CreateText(text, "RESOURCES", gameState->titleFont);
     RenderText(text, TransformBox({ 0, 0, 200, accumulatedYPadding }, TOP_LEFT), scale);
 
     // resources

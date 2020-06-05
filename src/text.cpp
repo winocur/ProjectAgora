@@ -74,3 +74,9 @@ TTF_Font* LoadFont (char* fontFile, int fontSize) {
         return NULL;
     }
 }
+
+void DoText (const char* message, BoundingBox box, TTF_Font* font, float scale) {
+    Text textMem;
+    Text* text = CreateText(&textMem, message, font);
+    RenderText(text, box, scale);
+}

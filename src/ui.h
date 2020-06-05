@@ -1,7 +1,15 @@
 #ifndef H_UI
 #define H_UI
 
+enum UIAnchor {
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_CENTER
+};
+
+
 struct UIButton {
+    char* name;
     BoundingBox box;
 
     void  (*action)(void);
