@@ -10,14 +10,19 @@ GameSession StartGame() {
     session.natureCounter = 0;
     
     // initial buildings
-    session.buildings[session.buildingCounter] = CreateBuilding(1, 1, Color { 0, 255, 125, 200 }, 8, 8, 50);
+    session.buildings[session.buildingCounter] = CreateBuilding(BUILDING_BLOCKS, 8, 8);
     session.buildingCounter++;
 
-    session.buildings[session.buildingCounter] = CreateBuilding(2, 2, Color { 255, 0, 125, 200 }, 2, 8, 30);
+    session.buildings[session.buildingCounter] = CreateBuilding(COAL_PLANT, 2, 8);
     session.buildingCounter++;
 
-    session.buildings[session.buildingCounter] = CreateBuilding(3, 1, Color { 125, 0, 125, 200 }, 2, 3, 80);
+    session.buildings[session.buildingCounter] = CreateBuilding(INDUSTRIAL_REFINERY, 8, 2);
     session.buildingCounter++;
+
+    session.buildings[session.buildingCounter] = CreateBuilding(BUSINESS_OFFICES, 14, 0);
+    session.buildingCounter++;
+
+    
 
     session.phase = GP_IDLE;
 
@@ -70,4 +75,39 @@ Resources GetDemolisionCost (const Building* building) {
 
 Resources GetMoveCost (const Building* building) {
     return Resources { 80, 50, 50 };
+}
+
+bool DemolishBuilding (Building* building) {
+
+    GameSession* session = &gameState->session;
+
+    Resources cost = GetDemolisionCost(building);
+    if(HasEnoughResources(session->resources, cost)) {
+        session->resources = session->resources - cost;
+        building->state = DESTROYED;
+        return true;
+    }
+
+    return false;
+}
+
+bool UpgradeBuilding (Building* building) {
+
+    GameSession* session = &gameState->session;
+
+    Resources cost = GetUpgradeCost(building);
+    if(HasEnoughResources(session->resources, cost)) {
+        session->resources = session->resources - cost;
+
+        if(building->data.evolution == BT_NONE) {
+            printf("Building has no evolution");
+            return false;
+        }
+
+        BuildingType type = building->data.evolution;
+        building->data = GetBuildingData(type);
+        return true;
+    }
+
+    return false;
 }

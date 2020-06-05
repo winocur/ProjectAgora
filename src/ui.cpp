@@ -12,7 +12,7 @@ void DrawWorldSpaceUI (GameSession* session, TTF_Font* mainFont, GameMemory* mem
 
 void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition, TTF_Font* mainFont) {
 
-    Vector2 buildingScreenPosition = WorldToScreenPosition (buildingWorldPosition) + Vector2 { 0, selectedBuilding->roofHeight + 30 };
+    Vector2 buildingScreenPosition = WorldToScreenPosition (buildingWorldPosition) + Vector2 { 0, selectedBuilding->data.height + 30 };
 
     BoundingBox panelBBox = { buildingScreenPosition.x, buildingScreenPosition.y, 150, 180 };
     DrawPanel(panelBBox, { 0, 0, 0, 200 });
@@ -90,7 +90,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     CreateText(text, textBuffer, mainFont);
     RenderText(text, TransformBox({ 0, 0, 200, accumulatedYPadding }, TOP_LEFT), scale);
     
-    length = sprintf(textBuffer, "Toxicity: %f", GetToxicity(session));
+    length = sprintf(textBuffer, "Toxicity: %i", (int)GetToxicity(session));
 
     text = (Text*)memory->temporaryStorageCurrent;
     memory->temporaryStorageCurrent += sizeof(Text*);
@@ -296,13 +296,20 @@ void PressDemolish () {
     printf("Demolish!\n");
 
     Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
-    selectedBuilding->state = DESTROYED;
 
-    gameState->selectedBuildingId = -1;
+    if(DemolishBuilding(selectedBuilding)) {
+        gameState->selectedBuildingId = -1;
+    }
 }
 
 void PressUpgrade () {
     printf("Upgrade!\n");
+
+    Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
+
+    if(UpgradeBuilding(selectedBuilding)) {
+        gameState->selectedBuildingId = -1;
+    }
 }
 
 void PressMove () {

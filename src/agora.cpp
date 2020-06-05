@@ -52,7 +52,7 @@ void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 }
 
 void CenterCamera (Building* building) {
-    gameState->camera.targetTranslation = ScreenToProjection(GetPosition (building, grid)) * -1 - Vector2 { 0, building->roofHeight };
+    gameState->camera.targetTranslation = ScreenToProjection(GetPosition (building, grid)) * -1 - Vector2 { 0, building->data.height };
 }
 
 void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
