@@ -266,23 +266,27 @@ void DrawCostContainer (GameSession* session, TTF_Font* mainFont, GameMemory* me
     
     Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
     char textBuffer [64];
-    Text text;
 
-    int accumulatedYPadding = 20;
+    int accumulatedYPadding = 30;
+    int xPadding = 15;
     
+    DoText(button->name, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 40 }, gameState->titleFont);
+
+    accumulatedYPadding += 20;
+
     int length = sprintf(textBuffer, "Energy: %i", costs.energy);
-    CreateText(&text, textBuffer, mainFont);
-    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 30 });
+
+    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 30 }, mainFont);
 
     length = sprintf(textBuffer, "Produc: %i", costs.production);
     accumulatedYPadding += 20;
-    CreateText(&text, textBuffer, mainFont);
-    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
+
+    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
 
     length = sprintf(textBuffer, "Commer: %i", costs.exchange);
     accumulatedYPadding += 20;
-    CreateText(&text, textBuffer, mainFont);
-    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
+
+    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
 }
 
 void DrawTickTimer (GameSession* session) {

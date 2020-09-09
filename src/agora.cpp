@@ -22,7 +22,6 @@ void TestButton () {
 
 void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
-
     //initialize game memory
     GameState * gs = (GameState *)gameMemory->permanentStorage;
     gs->camera.targetZoom = 1;
@@ -33,13 +32,11 @@ void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
     SpriteSheet* sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/demolish.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->demolishIcon = LoadSprite(&gs->_sprites[gs->nextSprite++],sheet, "demolish", 0, 0);     
 
-    
     sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/move.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->moveIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "move", 0, 0);
 
     sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/upgrade.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->upgradeIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
-
     
     // create grid
     PopulateGrid(&gs->grid);
@@ -60,7 +57,6 @@ void CenterCamera (Building* building) {
 void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
     
     windowDimension = windowDim;
-
     GLenum error = GL_NO_ERROR;
 
     float deltaTime = msElapsed / 1000.0;

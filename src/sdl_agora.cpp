@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 	SDL_Surface * windowSurface;
 	SDL_CreateWindowAndRenderer(1280, 720, SDL_WINDOW_OPENGL, &window, &renderer);
 
-	char* windowTitle = new char[64];
+	char windowTitle [64];
 
 	if(window == NULL) {
 		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
 
 	// Initialize openGL through SDL
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_CreateContext(window);
 
 	if( SDL_GL_SetSwapInterval( 1 ) < 0 )
@@ -97,7 +97,6 @@ int main(int argc, char *argv[]) {
 	u64 performanceFrequency = SDL_GetPerformanceFrequency();
 	u64 lastCounter = SDL_GetPerformanceCounter();
 
-	
 	while(running) {
 
 		GameInputFrame input;
@@ -146,8 +145,6 @@ int main(int argc, char *argv[]) {
 		lastCounter = endCounter;
 	} // -- END GAME LOOP -- //
 
-	delete [] windowTitle;
-
 	SDL_DestroyWindow (window);
 
 	Cleanup(&memory);
@@ -156,11 +153,11 @@ int main(int argc, char *argv[]) {
 }
 
 void Cleanup (GameMemory * gm) {
-		OutputDebug("Cleaning up resources");
-		GameCleanup(gm);
-		SDL_CloseAudio();
-		SDL_Quit();
-		TTF_Quit();
+	OutputDebug("Cleaning up resources");
+	GameCleanup(gm);
+	SDL_CloseAudio();
+	SDL_Quit();
+	TTF_Quit();
 }
 
 void OutputDebug(char * message) {
