@@ -5,20 +5,21 @@ void DrawWorldSpaceUI (GameSession* session, TTF_Font* mainFont, GameMemory* mem
     
     Building* selectedBuilding = QueryBuildingById(session->buildings, session->buildingCounter, selectedBuildingId);
 
-    if(selectedBuilding != NULL) {
+    if(selectedBuilding != NULL && session->phase == GP_IDLE) {
         DrawBuildingMenu (selectedBuilding, GetPosition (selectedBuilding, grid), mainFont);
     }
+
 }
 
 void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition, TTF_Font* mainFont) {
 
     Vector2 buildingScreenPosition = WorldToScreenPosition (buildingWorldPosition) + Vector2 { 0, selectedBuilding->data.height + 30 };
 
-    BoundingBox panelBBox = { buildingScreenPosition.x, buildingScreenPosition.y, 150, 180 };
+    BoundingBox panelBBox = { buildingScreenPosition.x, buildingScreenPosition.y, 150, 230 };
     DrawPanel(panelBBox, { 0, 0, 0, 200 });
 
     //printf("PanelBBox: [%f, %f, %f, %f]", panelBBox.x, panelBBox.y, panelBBox.width, panelBBox.height);
-    RegisterButton(UIButton { "Panel", panelBBox, PanelHit, NULL }, true);
+    RegisterButton(UIButton { "Panel", panelBBox, [] () {}, NULL }, true);
 
     Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
     int accumulatedYPadding = 0;
@@ -33,8 +34,13 @@ void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition
     CreateText(&text, textBuffer, mainFont);
     RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 30 });
     
-    length = sprintf(textBuffer, "Energy: %i", selectedBuilding->data.io.energy);
+    
+    length = sprintf(textBuffer, "Toxicity: %f", GetBuildingToxicity(selectedBuilding));
+    accumulatedYPadding += 40;
+    CreateText(&text, textBuffer, mainFont);
+    RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
 
+    length = sprintf(textBuffer, "Energy: %i", selectedBuilding->data.io.energy);
     accumulatedYPadding += 40;
     CreateText(&text, textBuffer, mainFont);
     RenderText(&text, { origin.x, origin.y - accumulatedYPadding, 0, 20 });
@@ -78,13 +84,12 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     // background
     BoundingBox panelBBox = TransformBox(BoundingBox {0, 0, 200, 200}, TOP_LEFT);
     DrawPanel(panelBBox, Color {0, 0, 0, 200 });
-    RegisterButton(UIButton { "Panel", panelBBox, PanelHit }, false);
+    RegisterButton(UIButton { "Panel", panelBBox, [] () {} }, false);
 
     char textBuffer [64];
     length = sprintf(textBuffer, "Population: %i", session->population);
 
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
+    text = GetFromTemporaryMemory<Text>(memory);
 
     accumulatedYPadding += 30;
     CreateText(text, textBuffer, mainFont);
@@ -92,9 +97,8 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     
     length = sprintf(textBuffer, "Toxicity: %i", (int)GetToxicity(session));
 
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
-
+    text = GetFromTemporaryMemory<Text>(memory);
+    
     accumulatedYPadding += 30;
     CreateText(text, textBuffer, mainFont);
     RenderText(text, TransformBox({ 0, 0, 200, accumulatedYPadding }, TOP_LEFT), scale);
@@ -102,8 +106,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     accumulatedYPadding += 10;
     
     // resources header
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
+    text = GetFromTemporaryMemory<Text>(memory);
 
     accumulatedYPadding += 30;
     CreateText(text, "RESOURCES", gameState->titleFont);
@@ -112,8 +115,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
     // resources
     length = sprintf(textBuffer, "Energy: %i", session->resources.energy);
 
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
+    text = GetFromTemporaryMemory<Text>(memory);
 
     accumulatedYPadding += 30;
     CreateText(text, textBuffer, mainFont);
@@ -121,8 +123,7 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
 
     length = sprintf(textBuffer, "Production: %i", session->resources.production);
 
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
+    text = GetFromTemporaryMemory<Text>(memory);
 
     accumulatedYPadding += 30;
     CreateText(text, textBuffer, mainFont);
@@ -130,19 +131,55 @@ void DrawMainPanel (GameSession* session, TTF_Font* mainFont, GameMemory* memory
 
     length = sprintf(textBuffer, "Exchange: %i", session->resources.exchange);
 
-    text = (Text*)memory->temporaryStorageCurrent;
-    memory->temporaryStorageCurrent += sizeof(Text*);
+    text = GetFromTemporaryMemory<Text>(memory);
 
     accumulatedYPadding += 30;
     CreateText(text, textBuffer, mainFont);
     RenderText(text, TransformBox({ 0, 0, 200, accumulatedYPadding }, TOP_LEFT), scale);
 }
 
+void DrawBuildButton () {
+
+    BoundingBox buttonBox = TransformBox( { 10, 10, 100, 100 }, BOTTOM_RIGHT);
+    DrawPanel(buttonBox, { 100, 100, 100, 100 } );
+    RenderSpriteToBox(gameState->hammerIcon, buttonBox);
+    RegisterButton(UIButton { "Build", buttonBox, [] () { gameState->session.phase = GP_BUILDING_MENU; }, NULL, [] () { return "Construct a new building"; } }, false);
+}
+
+void PressCreateBuilding (BuildingType type) {
+    gameState->session.phase = GP_MOVING_BUILDING;
+    Building building = CreateBuilding (type, 0, 0);
+    building.state = MOVING;
+    gameState->selectedBuildingId = PlaceBuilding(building)->instanceId;
+}
+
+void DrawCreateBuildingButton (BoundingBox rawBox, Sprite* sprite, void  (*clicAction)(void), char* buttonName) {
+    auto box = TransformBox (rawBox, CENTER);
+    DrawPanel (box, { 20, 20, 20, 255 });
+    RenderSpriteToBox(sprite, box);
+    RegisterButton(UIButton { buttonName, box, clicAction, GetDemolisionCost }, false);
+}
+
+void DrawBuildMenu () {
+
+    DrawPanel(TransformBox ( { 0, 0, 500, 300 }, CENTER), { 100, 100, 100, 255 } );
+    
+    DrawCreateBuildingButton ({ -180, 0, 100, 100 }, gameState->housing,    [] () { PressCreateBuilding(BUILDING_BLOCKS); }, "Housing");
+    DrawCreateBuildingButton ({ -60, 0, 100, 100 } , gameState->commercial, [] () { PressCreateBuilding(BUSINESS_OFFICES); }, "Commercial");
+    DrawCreateBuildingButton ({ 60, 0, 100, 100 }  , gameState->power,      [] () { PressCreateBuilding(COAL_PLANT); }, "Power");
+    DrawCreateBuildingButton ({ 180, 0, 100, 100 } , gameState->industry,   [] () { PressCreateBuilding(INDUSTRIAL_REFINERY); }, "Industry");
+}
+
 void DrawScreenSpaceUI (GameSession* session, TTF_Font* mainFont, GameMemory* memory) {
     
     DrawTickTimer (session);
     DrawMainPanel(session, mainFont, memory);
+    DrawBuildButton();
     DrawCostContainer (session, mainFont, memory);
+
+    if(session->phase == GP_BUILDING_MENU) {
+        DrawBuildMenu();
+    }
 }
 
 bool OnClicUI (Vector2 point, UIButton * buttons, int buttonCounter) {
@@ -196,9 +233,27 @@ BoundingBox TransformBox (BoundingBox box, UIAnchor anchor) {
             };
         }
 
+        case CENTER : {
+            return {
+                (windowDimension.width / 2) - (box.width / 2) + box.x,
+                (windowDimension.height / 2) - (box.height / 2) + box.y, 
+                box.width,
+                box.height
+            };
+        }
+
         case BOTTOM_CENTER : {
             return {
                 (windowDimension.width / 2) - (box.width / 2) + box.x,
+                box.y, 
+                box.width,
+                box.height,
+            };
+        }
+
+        case BOTTOM_RIGHT : {
+            return {
+                windowDimension.width - box.x - box.width,
                 box.y, 
                 box.width,
                 box.height,
@@ -256,37 +311,47 @@ void DrawCostContainer (GameSession* session, TTF_Font* mainFont, GameMemory* me
     if (gameState->hoverButton == NULL) return;
 
     const UIButton* button = gameState->hoverButton;
-    if(button->costs == NULL) return;
 
-    Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
-        
-    Resources costs = button->costs(selectedBuilding);
+    if(button->costs == NULL && button->hoverMessage == NULL) return;
+    
     BoundingBox panelBBox = TransformBox(BoundingBox {0,0,500,100} , BOTTOM_CENTER);
     DrawPanel(panelBBox, {100,0,0,150});
     
     Vector2 origin = { panelBBox.x, panelBBox.y + panelBBox.height };
     char textBuffer [64];
 
-    int accumulatedYPadding = 30;
-    int xPadding = 15;
-    
-    DoText(button->name, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 40 }, gameState->titleFont);
 
-    accumulatedYPadding += 20;
+    if(button->costs != NULL) 
+    {
+        Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
+        
+        Resources costs = button->costs(selectedBuilding);
 
-    int length = sprintf(textBuffer, "Energy: %i", costs.energy);
+        int accumulatedYPadding = 30;
+        int xPadding = 15;
+        
+        DoText(button->name, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 40 }, gameState->titleFont);
 
-    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 30 }, mainFont);
+        accumulatedYPadding += 20;
 
-    length = sprintf(textBuffer, "Produc: %i", costs.production);
-    accumulatedYPadding += 20;
+        int length = sprintf(textBuffer, "Energy: %i", costs.energy);
 
-    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
+        DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 30 }, mainFont);
 
-    length = sprintf(textBuffer, "Commer: %i", costs.exchange);
-    accumulatedYPadding += 20;
+        length = sprintf(textBuffer, "Produc: %i", costs.production);
+        accumulatedYPadding += 20;
 
-    DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
+        DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
+
+        length = sprintf(textBuffer, "Commer: %i", costs.exchange);
+        accumulatedYPadding += 20;
+
+        DoText(textBuffer, { origin.x + xPadding, origin.y - accumulatedYPadding, 0, 20 }, mainFont);
+    }
+    else
+    {
+        DoText(button->hoverMessage(), { origin.x + 20, origin.y - 20, 0, 20 }, mainFont);
+    }
 }
 
 void DrawTickTimer (GameSession* session) {
@@ -317,9 +382,13 @@ void PressUpgrade () {
 }
 
 void PressMove () {
-    gameState->session.phase = GP_MOVING_BUILDING;
+
+    Building* selectedBuilding = QueryBuildingById(gameState->session.buildings, gameState->session.buildingCounter, gameState->selectedBuildingId);
+
+    StartMovingBuilding(selectedBuilding);
 }
 
-void PanelHit () {
-    printf("PanelHit!\n");
+void PressOpenBuildMenu () {
+    gameState->session.phase = GP_BUILDING_MENU;
 }
+

@@ -4,7 +4,8 @@
 enum BuildingState {
     IDLE,
     SELECTED,
-    DESTROYED
+    DESTROYED,
+    MOVING,
 };
 
 enum BuildingType {
@@ -63,7 +64,9 @@ struct Building {
     BuildingData data;
 };
 
-void RenderBuilding (const Building* building, const TileGrid* grid);
+void RenderBuilding (const Building* building, const TileGrid* grid, GameMemory* gameMemory);
+
+void RenderBuildingClumping (const Building* building, GameMemory* gameMemory);
 
 Building* QueryBuilding (const Tile* tile, Building* buildings, const u32 buildingCount);
 
@@ -78,5 +81,11 @@ Building CreateBuilding (BuildingType type, int gridX, int gridY);
 Building* FilterLiveBuildings (int* outCount, Building* originBuildings, const int originCount, GameMemory* memory); 
 
 BuildingData GetBuildingData (BuildingType type);
+
+void RenderBuildingCollision (TileGrid* grid, Building* building);
+
+bool ValidateBuildingPosition (Building* movingBuilding);
+
+float GetBuildingToxicity (const Building* building);
 
 #endif

@@ -19,8 +19,11 @@ struct GameMemory {
 
 enum GamePhase {
     GP_IDLE,
-    GP_MOVING_BUILDING,
+    GP_MOVING_BUILDING, 
+    GP_BUILDING_MENU,
 };
+
+
 
 #include "physics.h"
 #include "graphics.h"
@@ -31,6 +34,21 @@ enum GamePhase {
 #include "buildings.h"
 #include "simulation.h"
 #include "ui.h"
+
+struct GameInputFrame {
+    f32 cameraX;
+    f32 cameraY;
+
+    f32 zoomChange;
+    
+    Vector2 mousePosition;
+    
+    u8 leftButton;    
+    u8 rightButton;
+    u8 middleButton;
+};
+
+#include "input.h"
 #include <math.h> 
 
 //Better version
@@ -99,6 +117,12 @@ struct GameState {
     Sprite* demolishIcon;
     Sprite* upgradeIcon;
     Sprite* moveIcon;
+    Sprite* hammerIcon;
+    
+    Sprite* housing;
+    Sprite* commercial;
+    Sprite* industry;
+    Sprite* power;
     
     Camera camera;
 
@@ -110,6 +134,7 @@ struct GameState {
 };
 
 GameState* gameState;
+GameMemory* gameMemory;
 
 void GameInit(SDL_Surface * surface, GameMemory * gameMemory);
 
@@ -122,5 +147,12 @@ void RenderGrid();
 Vector2 WorldToScreenPosition (Vector2 worldPosition);
 
 void RegisterButton (UIButton button);
+
+void ProcessEventsIdle (MouseEvents mouseEvents, Camera* camera, Vector2 worldMousePosition);
+
+void ProcessEventsMoveBuilding (MouseEvents mouseEvents, Camera* camera, Vector2 worldMousePosition);
+
+template <class T>
+T* GetFromTemporaryMemory(GameMemory* gameMemory, int count = 1);
 
 #endif  /* H_AGORA */

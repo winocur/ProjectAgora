@@ -4,7 +4,9 @@
 enum UIAnchor {
     TOP_LEFT,
     TOP_RIGHT,
-    BOTTOM_CENTER
+    CENTER,
+    BOTTOM_CENTER,
+    BOTTOM_RIGHT,
 };
 
 
@@ -14,6 +16,7 @@ struct UIButton {
 
     void  (*action)(void);
     Resources (*costs)(const Building*);
+    const char* (*hoverMessage)();
 };
 
 bool OnClicUI (Vector2 point, UIButton * buttons, int buttonCounter);
@@ -34,6 +37,10 @@ void DrawTickTimer (GameSession* session);
 
 void DrawBuildingMenu (Building* selectedBuilding, Vector2 buildingWorldPosition, TTF_Font* mainFont);
 
+void DrawBuildButton () ;
+
+const char* GetBuildMessage () ;
+
 BoundingBox TransformBox (BoundingBox box, UIAnchor anchor);
 
 
@@ -44,5 +51,7 @@ void PressDemolish ();
 void PressUpgrade ();
 void PressMove ();
 void PanelHit ();
+void PressOpenBuildMenu ();
+
 
 #endif

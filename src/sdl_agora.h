@@ -25,19 +25,6 @@ typedef double		f64;
 
 #include "agora.h"
 
-struct GameInputFrame {
-    f32 cameraX;
-    f32 cameraY;
-
-    f32 zoomChange;
-    
-    Vector2 mousePosition;
-    
-    u8 leftButton;    
-    u8 rightButton;
-    u8 middleButton;
-};
-
 bool HandleEvent(SDL_Event* event, GameInputFrame* input);
 
 WindowDimension SdlGetWindowDimension (SDL_Window * window);

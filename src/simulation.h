@@ -5,11 +5,11 @@ struct Nature {
 
     u32 level;
 
-    static const float toxicityFactor = 3.0;
+    static constexpr  float toxicityFactor = 3.0;
 };
 
 struct GameSession {
-    static const float tickTime = 10000.0; 
+    static constexpr  float tickTime = 10000.0; 
 
     u32 population;
 
@@ -45,5 +45,9 @@ Resources GetMoveCost (const Building* building);
 bool UpgradeBuilding (Building* building);
 
 bool DemolishBuilding (Building* building);
+
+bool StartMovingBuilding (Building* building);
+
+Building* PlaceBuilding (Building building);
 
 #endif

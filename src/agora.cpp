@@ -13,8 +13,11 @@ WindowDimension windowDimension;
 
 #include "resources.h"
 #include "buildings.cpp"
+#include "level.cpp"
 #include "simulation.cpp"
 #include "ui.cpp"
+
+#include "utils.h"
 
 void TestButton () {
     printf("Test button pressed!\n");
@@ -37,7 +40,23 @@ void GameInit(SDL_Surface * windowSurface, GameMemory * gameMemory) {
 
     sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/upgrade.png", GL_RGBA, PNG, windowSurface, 1,1);
     gs->upgradeIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
-    
+
+    sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/hammer.png", GL_RGBA, PNG, windowSurface, 1,1);
+    gs->hammerIcon = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
+   
+    sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/housing.png", GL_RGBA, PNG, windowSurface, 1,1);
+    gs->housing = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
+   
+    sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/commercial.png", GL_RGBA, PNG, windowSurface, 1,1);
+    gs->commercial = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
+   
+    sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/industry.png", GL_RGBA, PNG, windowSurface, 1,1);
+    gs->industry = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
+   
+    sheet = LoadSpriteSheet (&gs->spriteSheets[gs->nextSpriteSheet++], "../assets/images/power.png", GL_RGBA, PNG, windowSurface, 1,1);
+    gs->power = LoadSprite(&gs->_sprites[gs->nextSprite++], sheet, "upgrade", 0, 0);
+   
+
     // create grid
     PopulateGrid(&gs->grid);
     grid = &gs->grid;
@@ -54,7 +73,7 @@ void CenterCamera (Building* building) {
     gameState->camera.targetTranslation = ScreenToProjection(GetPosition (building, grid)) * -1 - Vector2 { 0, building->data.height };
 }
 
-void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
+void GameUpdateAndRender (GameMemory * gm, WindowDimension windowDim, f64 msElapsed, GameInputFrame input) {
     
     windowDimension = windowDim;
     GLenum error = GL_NO_ERROR;
@@ -62,21 +81,128 @@ void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f6
     float deltaTime = msElapsed / 1000.0;
 
     // input
+    gameMemory = gm;
     MouseEvents mouseEvents = ProcessMouseInput(&input);
     GameState * gs = (GameState *)gameMemory->permanentStorage;
     gameState = gs;
 
     Camera* camera = &gs->camera;
 
-    camera->targetZoom += mouseEvents.zoomChange;
-    if(camera->targetZoom > 2) camera->targetZoom = 2;
-    if (camera->targetZoom < 0.5) camera->targetZoom = 0.5f;
+    camera->targetZoom = Clamp(camera->targetZoom + mouseEvents.zoomChange, 0.5, 2.0);
 
     Vector2 worldMousePosition = mouseEvents.mousePosition;
     worldMousePosition = worldMousePosition - Vector2 { windowDimension.width / 2, windowDimension.height / 2 };
     worldMousePosition = worldMousePosition * camera->actualZoom;
     worldMousePosition = worldMousePosition - camera->actualTranslation;
     
+    switch(gs->session.phase) {
+        case GP_IDLE : {
+            // simulation
+            gs->session.timer += msElapsed;
+            if (gs->session.timer > gs->session.tickTime) {
+                ProcessTick(&gs->session);
+            } 
+        } 
+        case GP_BUILDING_MENU : {
+            ProcessEventsIdle (mouseEvents, camera, worldMousePosition);
+        } break;
+        case GP_MOVING_BUILDING : ProcessEventsMoveBuilding (mouseEvents, camera, worldMousePosition); break;
+    }
+
+    error = glGetError();
+    if(error != GL_NO_ERROR) {
+        printf("OpenGL Error: %s\n", gluErrorString( error ));
+    }
+
+    // clears temporary memory
+    // We're doing this here instead of the frame boundary so buttons
+    // created in the last frame can be interacted at the beggining of this
+    // one creating a one-frame retained mode of sorts
+    // that gets thrown away every frame
+    gameMemory->temporaryStorageCurrent = gameMemory->temporaryStorage;
+
+    // allocate space for up to 64 buttons to be filled by the menu rendering.
+    gameState->buttons = GetFromTemporaryMemory<UIButton>(gameMemory, 64);
+    gameState->buttonCounter = 0;
+    
+    // camera interp
+    camera->actualZoom = Lerp(camera->actualZoom, camera->targetZoom, 10     * deltaTime);
+    camera->actualTranslation = Lerp(camera->actualTranslation, camera->targetTranslation, 8 * deltaTime);
+
+   
+
+    // --  rendering --
+    //Clear color buffer
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //Pop default matrix onto current matrix
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
+
+    //Save default matrix again with camera translation
+    glPushMatrix();
+
+    Building sortedBuildings[32];
+    SortBuildings(gs->session.buildings, sortedBuildings, gs->session.buildingCounter);
+
+    glPushMatrix();
+
+    // world space projection
+    glOrtho( -windowDimension.width * camera->actualZoom / 2, windowDimension.width * camera->actualZoom / 2, -windowDimension.height * camera->actualZoom / 2, windowDimension.height * camera->actualZoom / 2, 1.0, -1.0 );
+    glTranslatef(camera->actualTranslation.x,camera->actualTranslation.y, 0);  
+      
+    Tile hover = QueryTile (&gs->grid, worldMousePosition);
+    HighlightTile(hover, { 0, 120, 120, 120 });
+
+    RenderGrid (&gs->grid);
+
+    for (int i = 0; i < gs->session.buildingCounter; i++) {
+        
+        // skip destroyed buildings
+        if(sortedBuildings[i].state == DESTROYED) continue;
+
+        RenderBuilding(&sortedBuildings[i], &gs->grid, gameMemory);
+    }
+
+    if(gs->session.phase == GP_MOVING_BUILDING) {
+
+        Building* selectedBuilding = QueryBuildingById (gs->session.buildings, gs->session.buildingCounter, gs->selectedBuildingId);
+        RenderBuildingCollision(&gs->grid, selectedBuilding);
+    }
+
+    glPopMatrix();
+
+    // World space UI
+    glPushMatrix();
+    glOrtho( -windowDimension.width / 2, windowDimension.width / 2, -windowDimension.height / 2, windowDimension.height / 2, 1.0, -1.0 );
+
+    glTranslatef(camera->actualTranslation.x / camera->actualZoom, camera->actualTranslation.y / camera->actualZoom, 0);  
+
+    DrawWorldSpaceUI(&gs->session, gs->mainFont, gameMemory, gs->selectedBuildingId, gs->camera.actualZoom);
+    glPopMatrix();
+
+    // screen space UI
+    glOrtho( 0, windowDimension.width, 0, windowDimension.height, 1.0, -1.0 );
+    
+    DrawScreenSpaceUI(&gs->session, gs->mainFont, gameMemory) ;
+    //EOF
+}
+
+void GameCleanup(GameMemory * gm) {
+    free (gm->permanentStorage);
+    free (gm->temporaryStorage);
+}
+
+Vector2 WorldToScreenPosition (Vector2 worldPosition) {
+    Camera camera = gameState->camera;
+    Vector2 projectedPosition = ScreenToProjection(worldPosition);
+    return Vector2 { projectedPosition.x / camera.actualZoom, projectedPosition.y / camera.actualZoom };
+}
+
+void ProcessEventsIdle (MouseEvents mouseEvents, Camera* camera, Vector2 worldMousePosition) {
+
+    GameState* gs = gameState;
+
     if(mouseEvents.event == CLIC) {
         if(!OnClicUI(mouseEvents.mousePosition, gs->buttons, gs->buttonCounter)) {
 
@@ -115,94 +241,37 @@ void GameUpdateAndRender (GameMemory * gameMemory, WindowDimension windowDim, f6
     } else {
         OnHoverUI(mouseEvents.mousePosition, gs->buttons, gs->buttonCounter);
     }
+}
 
-    error = glGetError();
-    if(error != GL_NO_ERROR) {
-        printf("OpenGL Error: %s\n", gluErrorString( error ));
-    }
+void ProcessEventsMoveBuilding (MouseEvents mouseEvents, Camera* camera, Vector2 worldMousePosition) {
 
-    // clears temporary memory
-    // We're doing this here instead of the frame boundary so buttons
-    // created in the last frame can be interacted at the beggining of this
-    // one creating a one-frame retained mode of sorts
-    // that gets thrown away every frame
-    gameMemory->temporaryStorageCurrent = gameMemory->temporaryStorage;
+    GameState* gs = gameState;
 
-    // allocate space for up to 64 buttons to be filled by the menu rendering.
-    gameState->buttons = (UIButton*)gameMemory->temporaryStorageCurrent;
-    gameState->buttonCounter = 0;
-    gameMemory->temporaryStorageCurrent += sizeof(UIButton) * 64;
-
-    // camera interp
-    camera->actualZoom = Lerp(camera->actualZoom, camera->targetZoom, 10     * deltaTime);
-    camera->actualTranslation = Lerp(camera->actualTranslation, camera->targetTranslation, 8 * deltaTime);
-
-    // simulation
-    gs->session.timer += msElapsed;
-    if (gs->session.timer > gs->session.tickTime) {
-        ProcessTick(&gs->session);
-    }
-
-    // --  rendering --
-    //Clear color buffer
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //Pop default matrix onto current matrix
-    glMatrixMode( GL_MODELVIEW );
-    glPopMatrix();
-
-    //Save default matrix again with camera translation
-    glPushMatrix();
-
-    Building sortedBuildings[32];
-    SortBuildings(gs->session.buildings, sortedBuildings, gs->session.buildingCounter);
-
-    glPushMatrix();
-
-    // world space projection
-    glOrtho( -windowDimension.width * camera->actualZoom / 2, windowDimension.width * camera->actualZoom / 2, -windowDimension.height * camera->actualZoom / 2, windowDimension.height * camera->actualZoom / 2, 1.0, -1.0 );
-    glTranslatef(camera->actualTranslation.x,camera->actualTranslation.y, 0);  
-      
-
-    Tile hover = QueryTile (&gs->grid, worldMousePosition);
-    HighlightTile(hover, { 0, 120, 120, 120 });
-
-    RenderGrid (&gs->grid);
-
-    for (int i = 0; i < gs->session.buildingCounter; i++) {
-        
-        // skip destroyed buildings
-        if(sortedBuildings[i].state == DESTROYED) continue;
-
-        RenderBuilding(&sortedBuildings[i], &gs->grid);
-    }
-
-    glPopMatrix();
-
-    // World space UI
-    glPushMatrix();
-    glOrtho( -windowDimension.width / 2, windowDimension.width / 2, -windowDimension.height / 2, windowDimension.height / 2, 1.0, -1.0 );
-
-    glTranslatef(camera->actualTranslation.x / camera->actualZoom, camera->actualTranslation.y / camera->actualZoom, 0);  
-
-    DrawWorldSpaceUI(&gs->session, gs->mainFont, gameMemory, gs->selectedBuildingId, gs->camera.actualZoom);
-    glPopMatrix();
-
-    // screen space UI
-    glOrtho( 0, windowDimension.width, 0, windowDimension.height, 1.0, -1.0 );
+    Tile selected = QueryTile (&gs->grid, worldMousePosition);
     
-    DrawScreenSpaceUI(&gs->session, gs->mainFont, gameMemory) ;
-    //EOF
+    Building* selectedBuilding = QueryBuildingById (gs->session.buildings, gs->session.buildingCounter, gs->selectedBuildingId);
+    
+    selectedBuilding->gridX = selected.indexX;
+    selectedBuilding->gridY = selected.indexY;
+    
+    if(mouseEvents.event == CLIC) {
+
+        if(ValidateBuildingPosition(selectedBuilding)) {
+            gs->session.phase = GP_IDLE;
+            gs->selectedBuildingId = -1;
+            selectedBuilding->state = IDLE;
+        }
+
+    } else if(mouseEvents.event == DRAG_CAMERA) {
+        camera->targetTranslation = camera->targetTranslation + mouseEvents.mouseDelta * camera->actualZoom;
+    } 
+
 }
 
-void GameCleanup(GameMemory * gm) {
-    free (gm->permanentStorage);
-    free (gm->temporaryStorage);
-}
+template <class T>
+T* GetFromTemporaryMemory(GameMemory* gameMemory, int count) {
 
-Vector2 WorldToScreenPosition (Vector2 worldPosition) {
-    Camera camera = gameState->camera;
-    Vector2 projectedPosition = ScreenToProjection(worldPosition);
-    return Vector2 { projectedPosition.x / camera.actualZoom, projectedPosition.y / camera.actualZoom };
+    T* data = (T*)gameMemory->temporaryStorageCurrent;
+    gameMemory->temporaryStorageCurrent += sizeof(T*) * count;
+    return data;
 }
-

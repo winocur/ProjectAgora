@@ -10,19 +10,7 @@ GameSession StartGame() {
     session.natureCounter = 0;
     
     // initial buildings
-    session.buildings[session.buildingCounter] = CreateBuilding(BUILDING_BLOCKS, 8, 8);
-    session.buildingCounter++;
-
-    session.buildings[session.buildingCounter] = CreateBuilding(COAL_PLANT, 2, 8);
-    session.buildingCounter++;
-
-    session.buildings[session.buildingCounter] = CreateBuilding(INDUSTRIAL_REFINERY, 8, 2);
-    session.buildingCounter++;
-
-    session.buildings[session.buildingCounter] = CreateBuilding(BUSINESS_OFFICES, 14, 0);
-    session.buildingCounter++;
-
-    
+    LoadLevel(&session);
 
     session.phase = GP_IDLE;
 
@@ -43,7 +31,7 @@ float GetToxicity (const GameSession* session) {
     for (int i = 0; i < session->buildingCounter; i++) {
 
         Building building = session->buildings[i];
-        toxicity += building.data.toxicity;
+        toxicity += GetBuildingToxicity(&building);
     }
 
     return toxicity;
@@ -75,6 +63,18 @@ Resources GetDemolisionCost (const Building* building) {
 
 Resources GetMoveCost (const Building* building) {
     return Resources { 80, 50, 50 };
+}
+
+bool StartMovingBuilding (Building* building) {
+
+    GameSession* session = &gameState->session;
+
+    Resources cost = GetMoveCost(building);
+    if(HasEnoughResources(session->resources, cost)) {
+        session->resources = session->resources - cost;
+        session->phase = GP_MOVING_BUILDING;
+        building->state = MOVING;
+    }
 }
 
 bool DemolishBuilding (Building* building) {
@@ -110,4 +110,20 @@ bool UpgradeBuilding (Building* building) {
     }
 
     return false;
+}
+
+Building* PlaceBuilding (Building building) {
+
+    GameSession* session = &gameState->session;
+
+    for (int i = 0; i < session->buildingCounter; i++) {
+        if (session->buildings[i].state == DESTROYED) {
+            session->buildings[i] = building;
+            return session->buildings + i;
+        }
+    }
+
+    session->buildings[session->buildingCounter] = building;
+    session->buildingCounter++;
+    return session->buildings + (session->buildingCounter - 1);
 }

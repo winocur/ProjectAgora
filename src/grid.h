@@ -20,7 +20,7 @@ struct TileGrid {
     int height;
     int width;
 
-    Tile tiles [32][32] ;
+    Tile tiles [64][64] ;
 
     float tileHeight;
     float tileWidth;
@@ -45,5 +45,7 @@ void HighlightTile (Tile tile, Color color);
 Vector2 ScreenToProjection (Vector2 screenPoint, float squash = 0.5f);
 
 Vector2 ProjectionToScreen (Vector2 projectedPoint, float squash = 0.5f);
+
+Tile* GetClumpingTiles (TileGrid* grid, int clumpArea, int centerX, int centerY, int objectSize, int* outTiles, GameMemory* gameMemory);
 
 #endif

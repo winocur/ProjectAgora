@@ -5,8 +5,8 @@ void PopulateGrid (TileGrid * grid) {
     grid->height = 16;
     grid->width = 16;
 
-    grid->tileHeight = 60;
-    grid->tileWidth = 60;
+    grid->tileHeight = 30;
+    grid->tileWidth = 30;
 
     grid->center = { 0,0 };
 
@@ -31,8 +31,8 @@ void PopulateGrid (TileGrid * grid) {
 
 void RenderGrid (TileGrid* grid) {
 
-    glColor4ub (240, 57, 53, 124);
-    glLineWidth (5.0);
+    glColor4ub (210, 210, 210, 124);
+    glLineWidth (3.0);
 
     float halfHeight = grid->tileHeight / 2;
     float halfWidth  = grid->tileWidth / 2;
@@ -89,6 +89,54 @@ Tile QueryTile (TileGrid* grid, Vector2 worldPosition) {
     //printf("Failed to find tile");
     return grid->tiles[0][0];
 
+}
+
+Tile* GetClumpingTiles (TileGrid* grid, int clumpArea, int centerX, int centerY, int objectSize, int* outTiles, GameMemory* gameMemory) {
+
+    int clumpingSize = clumpArea;
+    Tile* tiles = (Tile*)gameMemory->temporaryStorageCurrent;
+    int clumpingCounter = 0;
+
+    for (int i = 1; i <= clumpingSize; i++) {
+        
+        int sweep = objectSize + (clumpingSize - i);
+
+        for (int j = -sweep; j <= sweep; j++) {
+            int clumpingX = centerX + j;
+            int clumpingY = centerY - objectSize - i;
+            *(tiles + clumpingCounter) = grid->tiles[clumpingX][clumpingY];
+            gameMemory->temporaryStorageCurrent += sizeof(Tile*);
+            clumpingCounter++;
+        }
+
+        for (int j = -sweep; j <= sweep; j++) {
+            int clumpingX = centerX + j;
+            int clumpingY = centerY + objectSize + i;
+            *(tiles + clumpingCounter) = grid->tiles[clumpingX][clumpingY];
+            gameMemory->temporaryStorageCurrent += sizeof(Tile*);
+            clumpingCounter++;
+        }
+
+        for (int j = -objectSize; j <= objectSize; j++) {
+            int clumpingX = centerX - objectSize - i;
+            int clumpingY = centerY + j;
+            *(tiles + clumpingCounter) = grid->tiles[clumpingX][clumpingY];
+            gameMemory->temporaryStorageCurrent += sizeof(Tile*);
+            clumpingCounter++;
+        }
+
+        for (int j = -objectSize; j <= objectSize; j++) {
+            int clumpingX = centerX + objectSize + i;
+            int clumpingY = centerY + j;
+            *(tiles + clumpingCounter) = grid->tiles[clumpingX][clumpingY];
+            gameMemory->temporaryStorageCurrent += sizeof(Tile*);
+            clumpingCounter++;
+        }
+        
+    }
+  
+    *outTiles = clumpingCounter;
+    return tiles;
 }
 
 void HighlightTile (Tile tile, Color color) {
