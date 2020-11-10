@@ -1,26 +1,6 @@
-# Coding guidelines #
+# Project Agora #
 
-### Function bodies ###
-    int CamelCaseFunction(void *something) {
-        int myInt;
-        int myInt2;
-        
-        myInt = 0;
-        myInt2 = 0;
-        ...
-    }
-
-### Enums ###
-    enum COLOR_T {
-        RED,
-        BLUE,
-        GREEN
-    };
-    
-    // Names can also be prefixed if needed
-    
-    enum MOVEMENT {
-        MOVEMENT_RUN,
-        MOVEMENT_WALK,
-        MOVEMENT_JUMP
-    };
+Project Agora is an indie city builder made by Manuel Winocur
+Made in c++ and SDL
+Coded in a simple, procedural style
+Inspired by Casey Muratori's Handmade Hero (https://www.youtube.com/user/handmadeheroarchive)
